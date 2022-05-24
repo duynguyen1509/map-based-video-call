@@ -7,7 +7,6 @@ const myPeer = new Peer(undefined, {
 }); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
 myVideo.muted = true;
-const peers = {};
 let myStream = null;
 
 navigator.mediaDevices
@@ -22,6 +21,7 @@ navigator.mediaDevices
       //listen and answer to the call
       call.answer(stream); //answer the call by sending them our current stream
       const video = document.createElement("video");
+      video.setAttribute("id", call.peer);
       call.on("stream", (userVideoStream) => {
         addVideoStream(video, userVideoStream);
       }); // take in 'their' video streams
@@ -58,16 +58,18 @@ Client.socket.on("newplayer", function (data) {
 function connectToNewUser(userId, stream) {
   const call = myPeer.call(userId, stream); //call user with userId and send our stream to that user
   const video = document.createElement("video");
+  video.setAttribute("id", userId);
   call.on("stream", (userVideoStream) => {
     addVideoStream(video, userVideoStream);
   }); // take in 'their' video streams
   call.on("close", () => {
+    console.log(123);
     video.remove();
   });
 }
 Client.socket.on("allplayers", function (data) {
+  console.log("all players: ", data);
   for (var i = 0; i < data.length; i++) {
-    console.log("all players: ", data);
     Game.addNewPlayer(data[i].id, data[i].x, data[i].y);
   }
 
@@ -76,6 +78,8 @@ Client.socket.on("allplayers", function (data) {
   });
 
   Client.socket.on("remove", function (id) {
+    console.log("user: " + id + " disconnected!");
+    if (document.getElementById(id)) document.getElementById(id).remove();
     Game.removePlayer(id);
   });
 });
