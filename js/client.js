@@ -22,7 +22,6 @@ navigator.mediaDevices
       const video = document.createElement("video");
       video.setAttribute("id", call.peer);
       call.on("stream", (userVideoStream) => {
-        console.log("streaming 1");
         addVideoStream(video, userVideoStream);
       }); // take in 'their' video streams
     });
@@ -64,7 +63,6 @@ function connectToNewUser(userId, stream) {
   const video = document.createElement("video");
   video.setAttribute("id", userId);
   call.on("stream", (userVideoStream) => {
-    console.log("streaming 2");
     addVideoStream(video, userVideoStream);
   }); // take in 'their' video streams
   call.on("close", () => {
