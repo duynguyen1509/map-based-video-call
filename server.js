@@ -1,14 +1,23 @@
+/*creat server*/
 var express = require("express");
 var app = express();
 var server = require("http").Server(app);
+/** */
+
+/**socket.io recognize our server */
 var io = require("socket.io").listen(server);
+/** */
+
 const { v4: uuidV4 } = require("uuid");
-app.use("/css", express.static(__dirname + "/css"));
-app.use("/js", express.static(__dirname + "/js"));
-app.use("/assets", express.static(__dirname + "/assets"));
 
 /**set up express server */
 app.set("view engine", "ejs");
+app.use("/css", express.static(__dirname + "/css"));
+app.use("/js", express.static(__dirname + "/js"));
+app.use("/assets", express.static(__dirname + "/assets"));
+/** */
+
+/**Routing */
 app.get("/", (req, res) => {
   res.redirect(`/${uuidV4()}`);
 });
@@ -17,8 +26,6 @@ app.get("/:room1", (req, res) => {
   // render view "room"
   res.render("room", { roomId: req.params.room1 });
 });
-
-// server.lastPlayderID = 0;
 
 server.listen(process.env.PORT || 8081, function () {
   console.log("Listening on " + server.address().port);
