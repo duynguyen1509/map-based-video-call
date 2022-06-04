@@ -2,8 +2,9 @@ var Client = {};
 Client.socket = io.connect();
 const videoGrid = document.getElementById("video-grid");
 const myPeer = new Peer(undefined, {
-  host: "/",
-  port: "3002",
+  secure: true,
+  host: "https://map-to-school.herokuapp.com/",
+  port: 3002,
 }); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
 myVideo.muted = true;
@@ -57,9 +58,6 @@ Client.sendClick = function (x, y) {
 Client.socket.on("join-room", function (data) {
   console.log("New User Connected: " + data.id);
   Game.addNewPlayer(data.id, data.x, data.y);
-  // const fc = () => connectToNewUser(data.id, myStream); //send current stream to new user
-  // timerid = setTimeout(fc, 1000);
-  //TODO: call other user on collision event
   setTimeout(() => {
     connectToNewUser(data.id, myStream); //send current stream to new user
   }, 1000);
