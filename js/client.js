@@ -17,12 +17,15 @@ navigator.mediaDevices
   .then((stream) => {
     myStream = stream;
     addVideoStream(myVideo, stream);
+    //TODO: answer call on collision event
     myPeer.on("call", (call) => {
+      console.log("call received", call);
       //listen and answer to the call
       call.answer(stream); //answer the call by sending them our current stream
       const video = document.createElement("video");
       video.setAttribute("id", call.peer);
       call.on("stream", (userVideoStream) => {
+        console.log("streaming 1");
         addVideoStream(video, userVideoStream);
       }); // take in 'their' video streams
     });
@@ -41,7 +44,9 @@ Client.sendTest = function () {
 
 Client.askNewPlayer = function () {
   myPeer.on("open", (uid) => {
-    Client.socket.emit("newplayer", uid); //send event to server
+    // Client.socket.emit("newplayer", uid); //send event to server
+    console.log(ROOM_ID);
+    Client.socket.emit("join-room", ROOM_ID, uid); //send event to server
   });
 };
 
@@ -49,17 +54,23 @@ Client.sendClick = function (x, y) {
   Client.socket.emit("click", { x: x, y: y });
 };
 
-Client.socket.on("newplayer", function (data) {
+Client.socket.on("join-room", function (data) {
   console.log("New User Connected: " + data.id);
   Game.addNewPlayer(data.id, data.x, data.y);
-  const fc = () => connectToNewUser(data.id, myStream); //send current stream to new user
-  timerid = setTimeout(fc, 1000);
+  // const fc = () => connectToNewUser(data.id, myStream); //send current stream to new user
+  // timerid = setTimeout(fc, 1000);
+  //TODO: call other user on collision event
+  setTimeout(() => {
+    connectToNewUser(data.id, myStream); //send current stream to new user
+  }, 1000);
 });
 function connectToNewUser(userId, stream) {
+  console.log("call user ", userId);
   const call = myPeer.call(userId, stream); //call user with userId and send our stream to that user
   const video = document.createElement("video");
   video.setAttribute("id", userId);
   call.on("stream", (userVideoStream) => {
+    console.log("streaming 2");
     addVideoStream(video, userVideoStream);
   }); // take in 'their' video streams
   call.on("close", () => {

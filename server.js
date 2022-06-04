@@ -2,13 +2,20 @@ var express = require("express");
 var app = express();
 var server = require("http").Server(app);
 var io = require("socket.io").listen(server);
-
+const { v4: uuidV4 } = require("uuid");
 app.use("/css", express.static(__dirname + "/css"));
 app.use("/js", express.static(__dirname + "/js"));
 app.use("/assets", express.static(__dirname + "/assets"));
 
-app.get("/", function (req, res) {
-  res.sendFile(__dirname + "/index.html");
+/**set up express server */
+app.set("view engine", "ejs");
+app.get("/", (req, res) => {
+  res.redirect(`/${uuidV4()}`);
+});
+
+app.get("/:room1", (req, res) => {
+  // render view "room"
+  res.render("room", { roomId: req.params.room1 });
 });
 
 // server.lastPlayderID = 0;
@@ -19,7 +26,8 @@ server.listen(process.env.PORT || 8081, function () {
 
 io.on("connection", function (socket) {
   //socket used to establish the connection
-  socket.on("newplayer", function (uid) {
+  socket.on("join-room", function (roomId, uid) {
+    socket.join(roomId);
     console.log("player " + uid + " connected");
     socket.player = {
       id: uid,
@@ -28,7 +36,7 @@ io.on("connection", function (socket) {
     };
 
     socket.emit("allplayers", getAllPlayers()); //send to the new player the list of already connected players
-    socket.broadcast.emit("newplayer", socket.player); //broadcast new player info to all other players
+    socket.to(roomId).broadcast.emit("join-room", socket.player); //broadcast new player info to all other players
 
     socket.on("click", function (data) {
       // console.log("click to " + data.x + ", " + data.y);
