@@ -4,7 +4,7 @@ const videoGrid = document.getElementById("video-grid");
 const myPeer = new Peer(undefined, {
   secure: true,
   host: "map-to-school.herokuapp.com",
-  port: 3002,
+  port: 443,
 }); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
 myVideo.muted = true;
