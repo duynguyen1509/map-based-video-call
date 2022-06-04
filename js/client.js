@@ -1,10 +1,7 @@
 var Client = {};
 Client.socket = io.connect();
 const videoGrid = document.getElementById("video-grid");
-const myPeer = new Peer(undefined, {
-  host: "/",
-  port: "3002",
-}); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
+const myPeer = new Peer(undefined, {}); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
 myVideo.muted = true;
 let myStream = null;
@@ -17,7 +14,9 @@ navigator.mediaDevices
   .then((stream) => {
     myStream = stream;
     addVideoStream(myVideo, stream);
+    //TODO: answer call on collision event
     myPeer.on("call", (call) => {
+      console.log("call received", call);
       //listen and answer to the call
       call.answer(stream); //answer the call by sending them our current stream
       const video = document.createElement("video");
@@ -41,7 +40,9 @@ Client.sendTest = function () {
 
 Client.askNewPlayer = function () {
   myPeer.on("open", (uid) => {
-    Client.socket.emit("newplayer", uid); //send event to server
+    // Client.socket.emit("newplayer", uid); //send event to server
+    console.log(ROOM_ID);
+    Client.socket.emit("join-room", ROOM_ID, uid); //send event to server
   });
 };
 
@@ -49,13 +50,15 @@ Client.sendClick = function (x, y) {
   Client.socket.emit("click", { x: x, y: y });
 };
 
-Client.socket.on("newplayer", function (data) {
+Client.socket.on("join-room", function (data) {
   console.log("New User Connected: " + data.id);
   Game.addNewPlayer(data.id, data.x, data.y);
-  const fc = () => connectToNewUser(data.id, myStream); //send current stream to new user
-  timerid = setTimeout(fc, 1000);
+  setTimeout(() => {
+    connectToNewUser(data.id, myStream); //send current stream to new user
+  }, 1000);
 });
 function connectToNewUser(userId, stream) {
+  console.log("call user ", userId);
   const call = myPeer.call(userId, stream); //call user with userId and send our stream to that user
   const video = document.createElement("video");
   video.setAttribute("id", userId);

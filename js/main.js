@@ -1,4 +1,3 @@
-//noinspection JSCheckFunctionSignatures,JSCheckFunctionSignatures,JSCheckFunctionSignatures
 var game = new Phaser.Game(
   24 * 32,
   17 * 32,
