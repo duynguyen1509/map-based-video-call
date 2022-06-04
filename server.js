@@ -6,9 +6,9 @@ const { v4: uuidV4 } = require("uuid");
 app.use("/css", express.static(__dirname + "/css"));
 app.use("/js", express.static(__dirname + "/js"));
 app.use("/assets", express.static(__dirname + "/assets"));
+app.set("view engine", "ejs"); // use ejs template as view engine
 
-/**set up express server */
-app.set("view engine", "ejs");
+/**Routing */
 app.get("/", (req, res) => {
   res.redirect(`/${uuidV4()}`);
 });
@@ -17,8 +17,6 @@ app.get("/:room1", (req, res) => {
   // render view "room"
   res.render("room", { roomId: req.params.room1 });
 });
-
-// server.lastPlayderID = 0;
 
 server.listen(process.env.PORT || 8081, function () {
   console.log("Listening on " + server.address().port);
