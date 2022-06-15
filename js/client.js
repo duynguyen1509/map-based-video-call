@@ -52,9 +52,9 @@ Client.sendClick = function (x, y) {
 
 Client.socket.on("join-room", function (data) {
   console.log("New User Connected: " + data.id);
-  Game.addNewPlayer(data.id, data.x, data.y);
+  Game.addNewPlayer(data.id, data.x, data.y); //phaser
   setTimeout(() => {
-    connectToNewUser(data.id, myStream); //send current stream to new user
+    connectToNewUser(data.id, myStream); //send current stream to new user (peerJS)
   }, 1000);
 });
 function connectToNewUser(userId, stream) {

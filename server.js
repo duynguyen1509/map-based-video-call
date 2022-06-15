@@ -19,12 +19,12 @@ app.use("/assets", express.static(__dirname + "/assets"));
 
 /**Routing */
 app.get("/", (req, res) => {
-  res.redirect(`/${uuidV4()}`);
+  res.redirect(`/${uuidV4()}`); //random roomId
 });
 
 app.get("/:room1", (req, res) => {
   // render view "room"
-  res.render("room", { roomId: req.params.room1 });
+  res.render("room", { roomId: req.params.room1 }); //send roomId to client
 });
 
 server.listen(process.env.PORT || 8081, function () {
@@ -34,7 +34,7 @@ server.listen(process.env.PORT || 8081, function () {
 io.on("connection", function (socket) {
   //socket used to establish the connection
   socket.on("join-room", function (roomId, uid) {
-    socket.join(roomId);
+    socket.join(roomId); //audio video and the game are separate rooms
     console.log("player " + uid + " connected");
     socket.player = {
       id: uid,
