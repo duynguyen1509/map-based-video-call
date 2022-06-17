@@ -3,6 +3,7 @@ Client.socket = io.connect();
 const videoGrid = document.getElementById("video-grid");
 const myPeer = new Peer(undefined, {}); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
+const button_group = document.getElementById("btn-group");
 myVideo.muted = true;
 let myStream = null;
 
@@ -14,6 +15,34 @@ navigator.mediaDevices
   .then((stream) => {
     myStream = stream;
     addVideoStream(myVideo, stream);
+    /**Audio und Video an unnd ausmachen */
+
+    var video_button = document.createElement("button");
+    video_button.classList.add("btn", "btn-primary");
+    video_button.innerHTML = "Kamera ausmachen";
+    button_group.appendChild(video_button);
+
+    video_button.onclick = function () {
+      myStream.getVideoTracks()[0].enabled =
+        !myStream.getVideoTracks()[0].enabled;
+      video_button.innerHTML = myStream.getVideoTracks()[0].enabled
+        ? "Kamera ausmachen"
+        : "Kamera anmachen";
+    };
+
+    var audio_button = document.createElement("button");
+    audio_button.classList.add("btn", "btn-primary");
+    audio_button.innerHTML = "Audio ausmachen ";
+    button_group.appendChild(audio_button);
+
+    audio_button.onclick = function () {
+      myStream.getAudioTracks()[0].enabled =
+        !myStream.getAudioTracks()[0].enabled;
+      audio_button.innerHTML = myStream.getAudioTracks()[0].enabled
+        ? "Audio ausmachen"
+        : "Audio anmachen";
+    };
+
     //TODO: answer call on collision event
     myPeer.on("call", (call) => {
       console.log("call received", call);
