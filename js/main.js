@@ -1,6 +1,6 @@
 var game = new Phaser.Game(
-  24 * 32,
-  17 * 32,
+  20 * 16,
+  20 * 16,
   Phaser.AUTO,
   document.getElementById("game")
 );

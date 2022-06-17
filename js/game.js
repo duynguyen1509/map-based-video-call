@@ -15,6 +15,7 @@ Game.preload = function () { //assets laden
   game.load.image("m", "assets/sprites/m.png");
   game.load.image("f", "assets/sprites/f.png");
   game.load.image("d", "assets/sprites/d.png");
+  game.load.image("t", "assets/sprites/t.png");
   game.load.image("button","assets/sprites/question.png");
 };
 
@@ -40,10 +41,23 @@ Game.getCoordinates = function (layer, pointer) { //look at create
 };
 
 Game.addNewPlayer = function (id, x, y, t, r) { 
-  if (r==0){Game.playerMap[id] = game.add.sprite(x, y, "f");} //cases for roles
-  if (r==1){Game.playerMap[id] = game.add.sprite(x, y, "m");}
-  if (r==2){Game.playerMap[id] = game.add.sprite(x, y, "d");}  
-  if(t){Game.handsUp(id);} //Meldung durch Spieler
+  switch(r) {
+    case 0:
+      Game.playerMap[id] = game.add.sprite(x, y, "f");
+      break;
+    case 1:
+      Game.playerMap[id] = game.add.sprite(x, y, "m");
+      break;
+    case 2:
+      Game.playerMap[id] = game.add.sprite(x, y, "d");
+      break;
+    case 3:
+      Game.playerMap[id] = game.add.sprite(x, y, "t");
+      break;
+    default:
+      Game.playerMap[id] = game.add.sprite(x, y, "d");
+  } 
+  Game.handsUp(id,t); //Meldung durch Spieler
   Game.t[id]=t; //save tint setting
   Game.nameText[id] = game.add.text(x, (y+16), "name", { fontSize: '8px', fill: '#000' });
 };
@@ -69,5 +83,7 @@ Game.removePlayer = function (id) {
 };
 
 Game.handsUp = function(id){ //add red colour to sprite
-  Game.playerMap[id].tint = 0xff0000;
+  t != t;
+  if (t){Game.playerMap[id].tint = 0xff0000;}
+  else {Game.playerMap[id].tint = 0xffffff;}
 }
