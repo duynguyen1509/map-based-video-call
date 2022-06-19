@@ -1,11 +1,17 @@
 var Client = {};
 Client.socket = io.connect();
+let myPeer = null;
+Client.socket.on("connect", () => {
+  myPeer = new Peer(Client.socket.id, {});
+});
 const videoGrid = document.getElementById("video-grid");
-const myPeer = new Peer(undefined, {}); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
+// const myPeer = new Peer(undefined, {}); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
 const button_group = document.getElementById("btn-group");
 myVideo.muted = true;
 let myStream = null;
+let currentUser = null;
+const peers = {};
 
 navigator.mediaDevices
   .getUserMedia({
@@ -16,7 +22,6 @@ navigator.mediaDevices
     myStream = stream;
     addVideoStream(myVideo, stream);
     /**Audio und Video an unnd ausmachen */
-
     var video_button = document.createElement("button");
     video_button.classList.add("btn", "btn-primary");
     video_button.innerHTML = "Kamera ausmachen";
@@ -43,16 +48,36 @@ navigator.mediaDevices
         : "Audio anmachen";
     };
 
-    //TODO: answer call on collision event
+    var join_room1 = document.createElement("button");
+    join_room1.classList.add("btn", "btn-primary");
+    join_room1.innerHTML = "Raum 1 beitreten";
+    button_group.appendChild(join_room1);
+    join_room1.onclick = function () {
+      Client.socket.emit("join-room", 1, currentUser); //send join-room event to server
+    };
+
+    var join_room2 = document.createElement("button");
+    join_room2.classList.add("btn", "btn-primary");
+    join_room2.innerHTML = "Raum 2 beitreten";
+    button_group.appendChild(join_room2);
+    join_room2.onclick = function () {
+      Client.socket.emit("join-room", 2, currentUser); //send join-room event to server
+    };
+
     myPeer.on("call", (call) => {
       console.log("call received", call);
+      peers[call.peer] = call;
+      console.log(peers);
       //listen and answer to the call
       call.answer(stream); //answer the call by sending them our current stream
       const video = document.createElement("video");
-      video.setAttribute("id", call.peer);
       call.on("stream", (userVideoStream) => {
         addVideoStream(video, userVideoStream);
       }); // take in 'their' video streams
+      call.on("close", () => {
+        video.remove();
+        Client.socket.emit("call-closed", currentUser, call.peer); //currentUser:callee, call.peer:caller
+      });
     });
   });
 function addVideoStream(video, stream) {
@@ -69,36 +94,53 @@ Client.sendTest = function () {
 
 Client.askNewPlayer = function () {
   myPeer.on("open", (uid) => {
-    // Client.socket.emit("newplayer", uid); //send event to server
-    console.log(ROOM_ID);
-    Client.socket.emit("join-room", ROOM_ID, uid); //send event to server
+    Client.socket.emit("newplayer", uid); //trigger new player event
+    currentUser = uid;
+
+    // console.log(ROOM_ID);
+    // Client.socket.emit("join-room", ROOM_ID, uid);
   });
 };
 
 Client.sendClick = function (x, y) {
   Client.socket.emit("click", { x: x, y: y });
 };
-
-Client.socket.on("join-room", function (data) {
+Client.socket.on("newplayer", function (data) {
   console.log("New User Connected: " + data.id);
   Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r);
+});
+Client.socket.on("join-room", function (data) {
+  console.log("User " + data.id + " joined room");
+  // Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r);
   setTimeout(() => {
     connectToNewUser(data.id, myStream); //send current stream to new user (peerJS)
   }, 1000);
 });
+Client.socket.on("user-left", function (uid) {
+  console.log("user left room: ", uid);
+  endCall(uid);
+});
+
 function connectToNewUser(userId, stream) {
   console.log("call user ", userId);
   const call = myPeer.call(userId, stream); //call user with userId and send our stream to that user
+  peers[userId] = call;
+  console.log(peers);
   const video = document.createElement("video");
-  video.setAttribute("id", userId);
   call.on("stream", (userVideoStream) => {
     addVideoStream(video, userVideoStream);
   }); // take in 'their' video streams
   call.on("close", () => {
-    console.log(123);
     video.remove();
+    Client.socket.emit("call-closed", currentUser, userId); //currentUser:caller, userId:callee
   });
 }
+function endCall(uid) {
+  if (peers[uid]) peers[uid].close();
+}
+Client.socket.on("call-closed", function (uid) {
+  endCall(uid);
+});
 Client.socket.on("allplayers", function (data) {
   console.log("all players: ", data);
   for (var i = 0; i < data.length; i++) {
@@ -111,7 +153,7 @@ Client.socket.on("allplayers", function (data) {
 
   Client.socket.on("remove", function (id) {
     console.log("user: " + id + " disconnected!");
-    if (document.getElementById(id)) document.getElementById(id).remove();
     Game.removePlayer(id);
+    endCall(id);
   });
 });

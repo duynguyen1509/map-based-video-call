@@ -1,10 +1,12 @@
 var Game = {};
 
-Game.init = function () { //will make the game keep reacting to messages from the server even when the game window doesn’t have focus
+Game.init = function () {
+  //will make the game keep reacting to messages from the server even when the game window doesn’t have focus
   game.stage.disableVisibilityChange = true;
 };
 
-Game.preload = function () { //assets laden
+Game.preload = function () {
+  //assets laden
   game.load.tilemap(
     "map",
     "assets/map/example_map.json",
@@ -16,7 +18,7 @@ Game.preload = function () { //assets laden
   game.load.image("f", "assets/sprites/f.png");
   game.load.image("d", "assets/sprites/d.png");
   game.load.image("t", "assets/sprites/t.png");
-  game.load.image("button","assets/sprites/question.png");
+  game.load.image("button", "assets/sprites/question.png");
 };
 
 Game.create = function () {
@@ -31,17 +33,18 @@ Game.create = function () {
   }
   layer.inputEnabled = true; // Allows clicking on the map ; it's enough to do it on the last layer
   Game.nameText = {}; //Displays Player Name
-  Game.t = {};//Boolean-Value for tint in handsUp function
+  Game.t = {}; //Boolean-Value for tint in handsUp function
   layer.events.onInputUp.add(Game.getCoordinates, this); //position of the player who clicked can be updated for everyone
-  Client.askNewPlayer();//client will notify the server that a new player should be created
+  Client.askNewPlayer(); //client will notify the server that a new player should be created
 };
 
-Game.getCoordinates = function (layer, pointer) { //look at create
+Game.getCoordinates = function (layer, pointer) {
+  //look at create
   Client.sendClick(pointer.worldX, pointer.worldY);
 };
 
-Game.addNewPlayer = function (id, x, y, t, r) { 
-  switch(r) {
+Game.addNewPlayer = function (id, x, y, t, r) {
+  switch (r) {
     case 0:
       Game.playerMap[id] = game.add.sprite(x, y, "f");
       break;
@@ -56,10 +59,13 @@ Game.addNewPlayer = function (id, x, y, t, r) {
       break;
     default:
       Game.playerMap[id] = game.add.sprite(x, y, "d");
-  } 
-  Game.handsUp(id,t); //Meldung durch Spieler
-  Game.t[id]=t; //save tint setting
-  Game.nameText[id] = game.add.text(x, (y+16), "name", { fontSize: '8px', fill: '#000' });
+  }
+  //Meldung durch Spieler
+  Game.t[id] = t; //save tint setting
+  Game.nameText[id] = game.add.text(x, y + 16, "name", {
+    fontSize: "8px",
+    fill: "#000",
+  });
 };
 
 Game.movePlayer = function (id, x, y) {
@@ -70,7 +76,7 @@ Game.movePlayer = function (id, x, y) {
   var tweenn = game.add.tween(name);
   var duration = distance * 3;
   tween.to({ x: x, y: y }, duration);
-  tweenn.to({ x: x, y: (y+16) }, duration);
+  tweenn.to({ x: x, y: y + 16 }, duration);
   tween.start();
   tweenn.start();
 };
@@ -82,8 +88,12 @@ Game.removePlayer = function (id) {
   delete Game.nameText[id];
 };
 
-Game.handsUp = function(id){ //add red colour to sprite
+Game.handsUp = function (id) {
+  //add red colour to sprite
   t != t;
-  if (t){Game.playerMap[id].tint = 0xff0000;}
-  else {Game.playerMap[id].tint = 0xffffff;}
-}
+  if (t) {
+    Game.playerMap[id].tint = 0xff0000;
+  } else {
+    Game.playerMap[id].tint = 0xffffff;
+  }
+};

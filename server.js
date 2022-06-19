@@ -19,12 +19,13 @@ app.use("/assets", express.static(__dirname + "/assets"));
 
 /**Routing */
 app.get("/", (req, res) => {
-  res.redirect(`/${uuidV4()}`); //random roomId
+  // res.redirect(`/${uuidV4()}`); //random roomId
+  res.render("room");
 });
 
-app.get("/:room1", (req, res) => {
+app.get("/:roomId", (req, res) => {
   // render view "room"
-  res.render("room", { roomId: req.params.room1 }); //send roomId to client
+  res.render("room", { roomId: req.params.roomId }); //send roomId to client
 });
 
 server.listen(process.env.PORT || 8081, function () {
@@ -33,9 +34,9 @@ server.listen(process.env.PORT || 8081, function () {
 });
 
 io.on("connection", function (socket) {
+  console.log("socket id: ", socket.id);
   //socket used to establish the connection
-  socket.on("join-room", function (roomId, uid) {
-    socket.join(roomId); //audio video and the game are separate rooms
+  socket.on("newplayer", function (uid) {
     console.log("player " + uid + " connected");
     socket.player = {
       id: uid,
@@ -44,23 +45,35 @@ io.on("connection", function (socket) {
       t: false,
       r: 3,
     };
-
     socket.emit("allplayers", getAllPlayers()); //send to the new player the list of already connected players
-    socket.to(roomId).broadcast.emit("join-room", socket.player); //broadcast new player info to all other players
-
+    socket.broadcast.emit("newplayer", socket.player);
     socket.on("click", function (data) {
       // console.log("click to " + data.x + ", " + data.y);
       socket.player.x = data.x;
       socket.player.y = data.y;
       io.emit("move", socket.player);
     });
-
     socket.on("disconnect", function () {
       //io.emit(), which sends a message to all connected clients. We send the message 'remove', and send the id of the disconnected player to remove.
       io.emit("remove", socket.player.id);
     });
   });
-
+  rooms = [1, 2, 3, 4, 5, 6];
+  socket.on("join-room", function (roomId, uid) {
+    rooms.forEach((room) => {
+      if (room != roomId) {
+        //leave room
+        socket.leave(room);
+        socket.to(room).emit("user-left", uid);
+      }
+    });
+    socket.join(roomId); //audio video and the game are separate rooms
+    socket.to(roomId).broadcast.emit("join-room", socket.player); //broadcast new player info to all other players
+  });
+  socket.on("call-closed", function (u1, u2) {
+    //u1: person who hanged up => inform u2 that u1 hanged up
+    io.to(u2).emit("call-closed", u1);
+  });
   socket.on("test", function () {
     console.log("test received");
   });
