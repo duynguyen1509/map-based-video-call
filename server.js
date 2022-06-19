@@ -58,17 +58,14 @@ io.on("connection", function (socket) {
       io.emit("remove", socket.player.id);
     });
   });
-  rooms = [1, 2, 3, 4, 5, 6];
   socket.on("join-room", function (roomId, uid) {
-    rooms.forEach((room) => {
-      if (room != roomId) {
-        //leave room
-        socket.leave(room);
-        socket.to(room).emit("user-left", uid);
-      }
-    });
     socket.join(roomId); //audio video and the game are separate rooms
     socket.to(roomId).broadcast.emit("join-room", socket.player); //broadcast new player info to all other players
+  });
+  socket.on("leave-room", function (room, uid) {
+    //leave room
+    socket.leave(room);
+    socket.to(room).emit("user-left", uid);
   });
   socket.on("call-closed", function (u1, u2) {
     //u1: person who hanged up => inform u2 that u1 hanged up

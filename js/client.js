@@ -12,6 +12,7 @@ myVideo.muted = true;
 let myStream = null;
 let currentUser = null;
 const peers = {};
+let currentRoom = 0;
 
 navigator.mediaDevices
   .getUserMedia({
@@ -53,7 +54,12 @@ navigator.mediaDevices
     join_room1.innerHTML = "Raum 1 beitreten";
     button_group.appendChild(join_room1);
     join_room1.onclick = function () {
-      Client.socket.emit("join-room", 1, currentUser); //send join-room event to server
+      if (currentRoom != 1) {
+        console.log("leave room " + currentRoom + " and join room " + 1);
+        Client.socket.emit("leave-room", currentRoom, currentUser); //leave current room
+        Client.socket.emit("join-room", 1, currentUser); //join new room
+        currentRoom = 1;
+      } else console.log("stay at room " + currentRoom);
     };
 
     var join_room2 = document.createElement("button");
@@ -61,7 +67,12 @@ navigator.mediaDevices
     join_room2.innerHTML = "Raum 2 beitreten";
     button_group.appendChild(join_room2);
     join_room2.onclick = function () {
-      Client.socket.emit("join-room", 2, currentUser); //send join-room event to server
+      if (currentRoom != 2) {
+        console.log("leave room " + currentRoom + " and join room " + 2);
+        Client.socket.emit("leave-room", currentRoom, currentUser); //leave current room
+        Client.socket.emit("join-room", 2, currentUser); //join new room
+        currentRoom = 2;
+      } else console.log("stay at room " + currentRoom);
     };
 
     myPeer.on("call", (call) => {
