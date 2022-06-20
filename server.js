@@ -62,10 +62,10 @@ io.on("connection", function (socket) {
     socket.join(roomId); //audio video and the game are separate rooms
     socket.to(roomId).broadcast.emit("join-room", socket.player); //broadcast new player info to all other players
   });
-  socket.on("leave-room", function (room, uid) {
+  socket.on("leave-room", function (roomId, uid) {
     //leave room
-    socket.leave(room);
-    socket.to(room).emit("user-left", uid);
+    socket.leave(roomId);
+    socket.to(roomId).emit("user-left", uid);
   });
   socket.on("call-closed", function (u1, u2) {
     //u1: person who hanged up => inform u2 that u1 hanged up
