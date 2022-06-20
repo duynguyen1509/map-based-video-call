@@ -34,6 +34,7 @@ Game.create = function () {
   layer.inputEnabled = true; // Allows clicking on the map ; it's enough to do it on the last layer
   Game.nameText = {}; //Displays Player Name
   Game.t = {}; //Boolean-Value for tint in handsUp function
+  Game.z = {}; //zugeordneter Raum
   layer.events.onInputUp.add(Game.getCoordinates, this); //position of the player who clicked can be updated for everyone
   Client.askNewPlayer(); //client will notify the server that a new player should be created
 };
@@ -61,7 +62,13 @@ Game.addNewPlayer = function (id, x, y, t, r) {
       Game.playerMap[id] = game.add.sprite(x, y, "d");
   }
   //Meldung durch Spieler
-  Game.t[id] = t; //save tint setting
+  Game.t[id] = t;
+  if (t) {
+      Game.playerMap[id].tint = 0xff0000;
+    } else {
+    Game.playerMap[id].tint = 0xffffff;
+    } //save tint setting
+  Game.z[id] = Game.returnRoom(x,y);
   Game.nameText[id] = game.add.text(x, y + 16, "name", {
     fontSize: "8px",
     fill: "#000",
@@ -79,6 +86,10 @@ Game.movePlayer = function (id, x, y) {
   tweenn.to({ x: x, y: y + 16 }, duration);
   tween.start();
   tweenn.start();
+  if (Game.roomChanged(Game.z[id],Game.returnRoom(x,y))){
+    Game.z[id] = Game.returnRoom(x,y);
+    console.log("Raum gewechselt zu: " + Game.z[id]);
+  }
 };
 
 Game.removePlayer = function (id) {
@@ -91,9 +102,28 @@ Game.removePlayer = function (id) {
 Game.handsUp = function (id) {
   //add red colour to sprite
   t != t;
-  if (t) {
-    Game.playerMap[id].tint = 0xff0000;
-  } else {
-    Game.playerMap[id].tint = 0xffffff;
+};
+
+Game.returnRoom = function(x,y) {
+  if ((x>=224 && x<=320)&&(y>=128 && y <= 176)){
+    return 1;
+  }
+  else if ((x>=224 && x<=320)&&(y>=176 && y <= 218)){
+    return 2;
+  }
+  else if ((x>=224 && x<=320)&&(y>=219 && y <= 260)){
+    return 3;
+  }
+  else {
+    return 0;
+  }
+};
+
+Game.roomChanged = function(z1,z2) {
+  if (z1 == z2) {
+    return false;
+  }
+  else {
+    return true;
   }
 };

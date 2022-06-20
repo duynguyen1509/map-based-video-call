@@ -43,7 +43,7 @@ io.on("connection", function (socket) {
       x: randomInt(100, 100),
       y: randomInt(100, 100),
       t: false,
-      r: 3,
+      r: 3
     };
     socket.emit("allplayers", getAllPlayers()); //send to the new player the list of already connected players
     socket.broadcast.emit("newplayer", socket.player);
