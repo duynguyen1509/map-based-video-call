@@ -6,6 +6,8 @@ Game.init = function () {
 };
 
 Game.preload = function () {
+  game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+  game.scale.setMinMax(320, 320, 700, 700);
   //assets laden
   game.load.tilemap(
     "map",
@@ -88,7 +90,8 @@ Game.movePlayer = function (id, x, y) {
   tweenn.start();
   if (Game.roomChanged(Game.z[id],Game.returnRoom(x,y))){
     Game.z[id] = Game.returnRoom(x,y);
-    console.log("Raum gewechselt zu: " + Game.z[id]);
+    //console.log("Raum gewechselt zu: " + Game.z[id]); // hier client aufrufen
+    Client.socket.emit("join-room",Game.z[id],Client.currentUser)
   }
 };
 
