@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <%- include('./partials/head'); %>
-
     <style>
       #video-grid {
         display: grid;
@@ -14,18 +13,59 @@
         width: 100%;
         height: 100%;
         object-fit: fill;
+        border-radius: 20px;
+        padding: 10px;
       }
     </style>
   </head>
-  <body class="container">
-    <div id="video-grid"></div>
-    <div id="game"></div>
-    <div class="btn-group" role="group" id="btn-group">
-      <!-- <button type="button" class="btn btn-primary">Left</button>
-      <button type="button" class="btn btn-primary">Middle</button>
-      <button type="button" class="btn btn-primary">Right</button> -->
+  
+  <body>
+
+    <div class="container">
+      <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+          <a class="navbar-brand" href="#">
+            <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+              width="32px" height="32px" viewBox="0 0 64.000000 64.000000"
+              preserveAspectRatio="xMidYMid meet">
+
+              <g transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)"
+              fill="#000000" stroke="none">
+              <path d="M100 450 c0 -44 2 -80 5 -80 2 0 21 11 41 25 20 14 50 25 65 25 l29
+              0 0 -141 c0 -139 -7 -174 -36 -192 -35 -20 -6 -27 111 -27 117 0 146 7 111 27
+              -29 18 -36 53 -36 192 l0 141 29 0 c15 0 45 -11 65 -25 20 -14 39 -25 41 -25
+              3 0 5 36 5 80 l0 80 -215 0 -215 0 0 -80z m420 0 l0 -69 -36 24 c-21 14 -51
+              25 -70 25 l-34 0 0 -145 c0 -148 10 -195 42 -208 7 -3 -41 -5 -107 -5 -66 0
+              -114 2 -107 5 32 13 42 60 42 208 l0 145 -34 0 c-19 0 -49 -11 -70 -25 l-36
+              -24 0 69 0 70 205 0 205 0 0 -70z"/>
+              </g>
+              </svg>
+          </a>
+          <span class="fs-4">Tutoria</span>
+        </a>
+      </header>
     </div>
-  </body>
+
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="container">
+            <div id="video-grid"></div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div id="game"></div>
+          <br></br>
+          <div class="btn-group" role="group" id="btn-group">
+            <!-- <button type="button" class="btn btn-primary">Left</button>
+            <button type="button" class="btn btn-primary">Middle</button>
+            <button type="button" class="btn btn-primary">Right</button> -->
+            </div>
+          </div>
+      </div>
+    </div>
+
+    </body>
   <script src="js/game.js" type="text/javascript"></script>
   <script src="js/main.js" type="text/javascript"></script>
   <script src="js/client.js" type="text/javascript"></script>
