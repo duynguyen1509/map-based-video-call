@@ -14,6 +14,9 @@ let currentUser = null;
 const peers = {};
 let currentRoom = 0;
 
+Client.getCurrentUser = function () {
+  return currentUser;
+};
 navigator.mediaDevices
   .getUserMedia({
     video: true,
@@ -22,6 +25,7 @@ navigator.mediaDevices
   .then((stream) => {
     myStream = stream;
     addVideoStream(myVideo, stream);
+    myStream.getAudioTracks()[0].enabled = false;
     /**Audio und Video an unnd ausmachen */
     var video_button = document.createElement("button");
     video_button.classList.add("btn", "btn-primary");
@@ -38,7 +42,7 @@ navigator.mediaDevices
 
     var audio_button = document.createElement("button");
     audio_button.classList.add("btn", "btn-primary");
-    audio_button.innerHTML = "Audio ausmachen ";
+    audio_button.innerHTML = "Audio anmachen "; //User is muted by default
     button_group.appendChild(audio_button);
 
     audio_button.onclick = function () {
@@ -120,11 +124,11 @@ Client.socket.on("newplayer", function (data) {
   console.log("New User Connected: " + data.id);
   Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r);
 });
-Client.socket.on("join-room", function (data) {
-  console.log("User " + data.id + " joined room");
+Client.socket.on("join-room", function (player) {
+  console.log("User " + player.id + " joined room");
   // Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r);
   setTimeout(() => {
-    connectToNewUser(data.id, myStream); //send current stream to new user (peerJS)
+    connectToNewUser(player.id, myStream); //send current stream to new user (peerJS)
   }, 1000);
 });
 Client.socket.on("user-left", function (uid) {
