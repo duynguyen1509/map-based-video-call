@@ -63,13 +63,12 @@ Game.addNewPlayer = function (id, x, y, t, r) {
     default:
       Game.playerMap[id] = game.add.sprite(x, y, "d");
   }
-  //Meldung durch Spieler
-  Game.t[id] = t;
   if (t) {
     Game.playerMap[id].tint = 0xff0000;
   } else {
     Game.playerMap[id].tint = 0xffffff;
   } //save tint setting
+  
   Game.z[id] = Game.returnRoom(x, y);
 
   Game.nameText[id] = game.add.text(x, y + 16, "name", {
@@ -109,11 +108,6 @@ Game.removePlayer = function (id) {
   delete Game.nameText[id];
 };
 
-Game.handsUp = function (id) {
-  //add red colour to sprite
-  t != t;
-};
-
 Game.returnRoom = function (x, y) {
   if (x >= 224 && x <= 320 && y >= 128 && y <= 176) {
     return 1;
@@ -133,3 +127,11 @@ Game.roomChanged = function (z1, z2) {
     return true;
   }
 };
+
+Game.tintPlayer = function (id, t){
+  if (t) {
+    Game.playerMap[id].tint = 0xff0000;
+  } else {
+    Game.playerMap[id].tint = 0xffffff;
+  } //save tint setting
+}

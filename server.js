@@ -57,6 +57,10 @@ io.on("connection", function (socket) {
       //io.emit(), which sends a message to all connected clients. We send the message 'remove', and send the id of the disconnected player to remove.
       io.emit("remove", socket.player.id);
     });
+    socket.on("tint", function () {
+      socket.player.t = !socket.player.t
+      io.emit("tint", socket.player);
+    });
   });
   socket.on("join-room", function (roomId, uid) {
     socket.join(roomId); //audio video and the game are separate rooms

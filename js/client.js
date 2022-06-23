@@ -53,30 +53,12 @@ navigator.mediaDevices
         : "Audio anmachen";
     };
 
-    var join_room1 = document.createElement("button");
-    join_room1.classList.add("btn", "btn-primary");
-    join_room1.innerHTML = "Raum 1 beitreten";
-    button_group.appendChild(join_room1);
-    join_room1.onclick = function () {
-      if (currentRoom != 1) {
-        console.log("leave room " + currentRoom + " and join room " + 1);
-        Client.socket.emit("leave-room", currentRoom, currentUser); //leave current room
-        Client.socket.emit("join-room", 1, currentUser); //join new room
-        currentRoom = 1;
-      } else console.log("stay at room " + currentRoom);
-    };
-
-    var join_room2 = document.createElement("button");
-    join_room2.classList.add("btn", "btn-primary");
-    join_room2.innerHTML = "Raum 2 beitreten";
-    button_group.appendChild(join_room2);
-    join_room2.onclick = function () {
-      if (currentRoom != 2) {
-        console.log("leave room " + currentRoom + " and join room " + 2);
-        Client.socket.emit("leave-room", currentRoom, currentUser); //leave current room
-        Client.socket.emit("join-room", 2, currentUser); //join new room
-        currentRoom = 2;
-      } else console.log("stay at room " + currentRoom);
+    var handup = document.createElement("button");
+    handup.classList.add("btn", "btn-primary");
+    handup.innerHTML = "Melden";
+    button_group.appendChild(handup);
+    handup.onclick = function () {
+      Client.setTint();
     };
 
     myPeer.on("call", (call) => {
@@ -120,6 +102,12 @@ Client.askNewPlayer = function () {
 Client.sendClick = function (x, y) {
   Client.socket.emit("click", { x: x, y: y });
 };
+
+Client.setTint = function() {
+  Client.socket.emit("tint");
+  console.log("Client.steTint -> Client.socket.emit(tint);")
+};
+
 Client.socket.on("newplayer", function (data) {
   console.log("New User Connected: " + data.id);
   Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r);
@@ -164,6 +152,11 @@ Client.socket.on("allplayers", function (data) {
 
   Client.socket.on("move", function (data) {
     Game.movePlayer(data.id, data.x, data.y);
+  });
+
+  Client.socket.on("tint", function (data) {
+    console.log("tint " + data.t);
+    Game.tintPlayer(data.id, data.t);
   });
 
   Client.socket.on("remove", function (id) {
