@@ -20,7 +20,6 @@ Game.preload = function () {
   game.load.image("f", "assets/sprites/f.png");
   game.load.image("d", "assets/sprites/d.png");
   game.load.image("t", "assets/sprites/t.png");
-  game.load.image("button", "assets/sprites/question.png");
 };
 
 Game.create = function () {
@@ -35,19 +34,18 @@ Game.create = function () {
   }
   layer.inputEnabled = true; // Allows clicking on the map ; it's enough to do it on the last layer
   Game.nameText = {}; //Displays Player Name
-  Game.t = {}; //Boolean-Value for tint in handsUp function
   Game.z = {}; //zugeordneter Raum
   layer.events.onInputUp.add(Game.getCoordinates, this); //position of the player who clicked can be updated for everyone
   Client.askNewPlayer(); //client will notify the server that a new player should be created
 };
 
-Game.getCoordinates = function (layer, pointer) {
+Game.getCoordinates = function (layer, pointer) { //send Coordinates to Client 
   //look at create
   Client.sendClick(pointer.worldX, pointer.worldY);
 };
 
 Game.addNewPlayer = function (id, x, y, t, r) {
-  switch (r) {
+  switch (r) { //loads sprite according to role
     case 0:
       Game.playerMap[id] = game.add.sprite(x, y, "f");
       break;
@@ -63,21 +61,21 @@ Game.addNewPlayer = function (id, x, y, t, r) {
     default:
       Game.playerMap[id] = game.add.sprite(x, y, "d");
   }
-  if (t) {
+  if (t) { //updates tint on load
     Game.playerMap[id].tint = 0xff0000;
   } else {
     Game.playerMap[id].tint = 0xffffff;
   } //save tint setting
   
-  Game.z[id] = Game.returnRoom(x, y);
+  Game.z[id] = Game.returnRoom(x, y); //updates current video zone
 
-  Game.nameText[id] = game.add.text(x, y + 16, "name", {
+  Game.nameText[id] = game.add.text(x, y + 16, "name", { //display player name
     fontSize: "8px",
     fill: "#000",
   });
 };
 
-Game.movePlayer = function (id, x, y) {
+Game.movePlayer = function (id, x, y) { //moves players and changes room if x and y fall into positions
   // console.log("Aktueller Raum ", Game.z[id]);
   var player = Game.playerMap[id];
   var name = Game.nameText[id]; //Text must move too
@@ -101,14 +99,14 @@ Game.movePlayer = function (id, x, y) {
   }
 };
 
-Game.removePlayer = function (id) {
+Game.removePlayer = function (id) { // pretty clear
   Game.playerMap[id].destroy();
   delete Game.playerMap[id];
   Game.nameText[id].destroy();
   delete Game.nameText[id];
 };
 
-Game.returnRoom = function (x, y) {
+Game.returnRoom = function (x, y) { //identifies room through x n' y
   if (x >= 224 && x <= 320 && y >= 128 && y <= 176) {
     return 1;
   } else if (x >= 224 && x <= 320 && y >= 176 && y <= 218) {
@@ -120,7 +118,7 @@ Game.returnRoom = function (x, y) {
   }
 };
 
-Game.roomChanged = function (z1, z2) {
+Game.roomChanged = function (z1, z2) { //change room only when leaving another
   if (z1 == z2) {
     return false;
   } else {
@@ -128,7 +126,7 @@ Game.roomChanged = function (z1, z2) {
   }
 };
 
-Game.tintPlayer = function (id, t){
+Game.tintPlayer = function (id, t){ //dynamic tint: even if not on load 
   if (t) {
     Game.playerMap[id].tint = 0xff0000;
   } else {

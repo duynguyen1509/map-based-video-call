@@ -40,10 +40,10 @@ io.on("connection", function (socket) {
     console.log("player " + uid + " connected");
     socket.player = {
       id: uid,
-      x: randomInt(100, 100),
-      y: randomInt(100, 100),
+      x: randomInt(100, 110),
+      y: randomInt(100, 110),
       t: false,
-      r: 3
+      r: randomInt(0,4)
     };
     socket.emit("allplayers", getAllPlayers()); //send to the new player the list of already connected players
     socket.broadcast.emit("newplayer", socket.player);

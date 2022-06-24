@@ -25,10 +25,24 @@
   </head>
   
   <body>
-
+    <p id="demo"></p>
     <div class="container">
       <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
         <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+          <button onclick="myFunction()">Login</button>
+            
+            <script>
+            function myFunction() {
+              let text;
+              let person = prompt("Please enter your name:", "Harry Potter");
+              if (person == null || person == "") {
+                text = "User cancelled the prompt.";
+              } else {
+                text = "Hello " + person + "! How are you today?";
+              }
+              document.getElementById("demo").innerHTML = text;
+            }
+            </script>
           <a class="navbar-brand" href="#">
             <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
               width="32px" height="32px" viewBox="0 0 64.000000 64.000000"
