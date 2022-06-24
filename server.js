@@ -36,14 +36,15 @@ server.listen(process.env.PORT || 8081, function () {
 io.on("connection", function (socket) {
   console.log("socket id: ", socket.id);
   //socket used to establish the connection
-  socket.on("newplayer", function (uid) {
+  socket.on("newplayer", function (uid, name, rolle) {
     console.log("player " + uid + " connected");
     socket.player = {
       id: uid,
       x: randomInt(100, 110),
       y: randomInt(100, 110),
       t: false,
-      r: randomInt(0,4)
+      r: parseInt(rolle),
+      n: name
     };
     socket.emit("allplayers", getAllPlayers()); //send to the new player the list of already connected players
     socket.broadcast.emit("newplayer", socket.player);

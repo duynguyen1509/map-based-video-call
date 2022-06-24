@@ -36,7 +36,9 @@ Game.create = function () {
   Game.nameText = {}; //Displays Player Name
   Game.z = {}; //zugeordneter Raum
   layer.events.onInputUp.add(Game.getCoordinates, this); //position of the player who clicked can be updated for everyone
-  Client.askNewPlayer(); //client will notify the server that a new player should be created
+  let person = prompt("Bitte Namen eingeben", "Name");
+  let rolle = prompt("Bitte Rolle eingeben", "0-3");
+  Client.askNewPlayer(person,rolle); //client will notify the server that a new player should be created
 };
 
 Game.getCoordinates = function (layer, pointer) { //send Coordinates to Client 
@@ -44,7 +46,7 @@ Game.getCoordinates = function (layer, pointer) { //send Coordinates to Client
   Client.sendClick(pointer.worldX, pointer.worldY);
 };
 
-Game.addNewPlayer = function (id, x, y, t, r) {
+Game.addNewPlayer = function (id, x, y, t, r, n) {
   switch (r) { //loads sprite according to role
     case 0:
       Game.playerMap[id] = game.add.sprite(x, y, "f");
@@ -69,7 +71,7 @@ Game.addNewPlayer = function (id, x, y, t, r) {
   
   Game.z[id] = Game.returnRoom(x, y); //updates current video zone
 
-  Game.nameText[id] = game.add.text(x, y + 16, "name", { //display player name
+  Game.nameText[id] = game.add.text(x, y + 16, n, { //display player name
     fontSize: "8px",
     fill: "#000",
   });

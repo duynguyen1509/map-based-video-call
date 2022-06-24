@@ -89,12 +89,12 @@ Client.sendTest = function () {
   Client.socket.emit("test");
 };
 
-Client.askNewPlayer = function () {
+Client.askNewPlayer = function (n,r) {
   myPeer.on("open", (uid) => {
-    Client.socket.emit("newplayer", uid); //trigger new player event
+    Client.socket.emit("newplayer", uid, n, r); //trigger new player event
     currentUser = uid;
 
-    // console.log(ROOM_ID);
+    console.log(n+r +"Test");
     // Client.socket.emit("join-room", ROOM_ID, uid);
   });
 };
@@ -110,7 +110,7 @@ Client.setTint = function() {
 
 Client.socket.on("newplayer", function (data) {
   console.log("New User Connected: " + data.id);
-  Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r);
+  Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r, data.n);
 });
 Client.socket.on("join-room", function (player) {
   console.log("User " + player.id + " joined room");
@@ -147,7 +147,7 @@ Client.socket.on("call-closed", function (uid) {
 Client.socket.on("allplayers", function (data) {
   console.log("all players: ", data);
   for (var i = 0; i < data.length; i++) {
-    Game.addNewPlayer(data[i].id, data[i].x, data[i].y, data[i].t, data[i].r);
+    Game.addNewPlayer(data[i].id, data[i].x, data[i].y, data[i].t, data[i].r, data[i].n);
   }
 
   Client.socket.on("move", function (data) {
