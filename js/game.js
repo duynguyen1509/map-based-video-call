@@ -38,16 +38,19 @@ Game.create = function () {
   layer.events.onInputUp.add(Game.getCoordinates, this); //position of the player who clicked can be updated for everyone
   let person = prompt("Bitte Namen eingeben", "Name");
   let rolle = prompt("Bitte Rolle eingeben", "0-3");
-  Client.askNewPlayer(person,rolle); //client will notify the server that a new player should be created
+  Client.askNewPlayer(person, rolle); //client will notify the server that a new player should be created
 };
 
-Game.getCoordinates = function (layer, pointer) { //send Coordinates to Client 
+Game.getCoordinates = function (layer, pointer) {
+  //send Coordinates to Client
   //look at create
   Client.sendClick(pointer.worldX, pointer.worldY);
 };
 
 Game.addNewPlayer = function (id, x, y, t, r, n) {
-  switch (r) { //loads sprite according to role
+  switch (
+    r //loads sprite according to role
+  ) {
     case 0:
       Game.playerMap[id] = game.add.sprite(x, y, "f");
       break;
@@ -63,21 +66,24 @@ Game.addNewPlayer = function (id, x, y, t, r, n) {
     default:
       Game.playerMap[id] = game.add.sprite(x, y, "d");
   }
-  if (t) { //updates tint on load
+  if (t) {
+    //updates tint on load
     Game.playerMap[id].tint = 0xff0000;
   } else {
     Game.playerMap[id].tint = 0xffffff;
   } //save tint setting
-  
+
   Game.z[id] = Game.returnRoom(x, y); //updates current video zone
 
-  Game.nameText[id] = game.add.text(x, y + 16, n, { //display player name
+  Game.nameText[id] = game.add.text(x, y + 16, n, {
+    //display player name
     fontSize: "8px",
     fill: "#000",
   });
 };
 
-Game.movePlayer = function (id, x, y) { //moves players and changes room if x and y fall into positions
+Game.movePlayer = function (id, x, y) {
+  //moves players and changes room if x and y fall into positions
   // console.log("Aktueller Raum ", Game.z[id]);
   var player = Game.playerMap[id];
   var name = Game.nameText[id]; //Text must move too
@@ -90,37 +96,51 @@ Game.movePlayer = function (id, x, y) { //moves players and changes room if x an
   tween.start();
   tweenn.start();
   if (
+    Client.getCurrentUser() != id &&
+    Game.roomChanged(Game.z[id], Game.returnRoom(x, y)) &&
+    Game.returnRoom(x, y) == 10
+  ) {
+    Client.tutor = id;
+    Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when someone enter room 10 then send that person our id
+  }
+  if (
     Client.getCurrentUser() == id &&
     Game.roomChanged(Game.z[id], Game.returnRoom(x, y))
   ) {
     Client.socket.emit("leave-room", Game.z[id], id); //leave old room
     console.log("Ich hab den Raum gewechselt zu: " + Game.returnRoom(x, y)); // hier client aufrufen
-    if (Game.returnRoom(x, y) != 0)
+    if (Game.returnRoom(x, y) > 0 && Game.returnRoom(x, y) < 6)
       Client.socket.emit("join-room", Game.returnRoom(x, y), id); //...join new room
     Game.z[id] = Game.returnRoom(x, y);
   }
 };
 
-Game.removePlayer = function (id) { // pretty clear
+Game.removePlayer = function (id) {
+  // pretty clear
   Game.playerMap[id].destroy();
   delete Game.playerMap[id];
   Game.nameText[id].destroy();
   delete Game.nameText[id];
 };
 
-Game.returnRoom = function (x, y) { //identifies room through x n' y
-  if (x >= 224 && x <= 320 && y >= 128 && y <= 176) {
+Game.returnRoom = function (x, y) {
+  //identifies room through x n' y
+  if (x >= 112 && x <= 208 && y >= 32 && y < 80) {
+    return 10;
+  }
+  if (x > 208 && x <= 320 && y >= 128 && y <= 176) {
     return 1;
-  } else if (x >= 224 && x <= 320 && y >= 176 && y <= 218) {
+  } else if (x > 208 && x <= 320 && y >= 176 && y <= 218) {
     return 2;
-  } else if (x >= 224 && x <= 320 && y >= 219 && y <= 260) {
+  } else if (x > 208 && x <= 320 && y >= 219 && y <= 260) {
     return 3;
   } else {
     return 0;
   }
 };
 
-Game.roomChanged = function (z1, z2) { //change room only when leaving another
+Game.roomChanged = function (z1, z2) {
+  //change room only when leaving another
   if (z1 == z2) {
     return false;
   } else {
@@ -128,10 +148,11 @@ Game.roomChanged = function (z1, z2) { //change room only when leaving another
   }
 };
 
-Game.tintPlayer = function (id, t){ //dynamic tint: even if not on load 
+Game.tintPlayer = function (id, t) {
+  //dynamic tint: even if not on load
   if (t) {
     Game.playerMap[id].tint = 0xff0000;
   } else {
     Game.playerMap[id].tint = 0xffffff;
   } //save tint setting
-}
+};

@@ -44,7 +44,7 @@ io.on("connection", function (socket) {
       y: randomInt(100, 110),
       t: false,
       r: parseInt(rolle),
-      n: name
+      n: name,
     };
     socket.emit("allplayers", getAllPlayers()); //send to the new player the list of already connected players
     socket.broadcast.emit("newplayer", socket.player);
@@ -59,7 +59,7 @@ io.on("connection", function (socket) {
       io.emit("remove", socket.player.id);
     });
     socket.on("tint", function () {
-      socket.player.t = !socket.player.t
+      socket.player.t = !socket.player.t;
       io.emit("tint", socket.player);
     });
   });
@@ -67,10 +67,15 @@ io.on("connection", function (socket) {
     socket.join(roomId); //audio video and the game are separate rooms
     socket.to(roomId).broadcast.emit("join-room", socket.player); //broadcast new player info to all other players
   });
+  socket.on("tutor-on-stage", function (tutor, tutand) {
+    socket.to(tutor).emit("call-tutand", tutand);
+  });
   socket.on("leave-room", function (roomId, uid) {
     //leave room
     socket.leave(roomId);
-    socket.to(roomId).emit("user-left", uid);
+    if (roomId == 10) {
+      socket.broadcast.emit("user-left", uid);
+    } else socket.to(roomId).emit("user-left", uid);
   });
   socket.on("call-closed", function (u1, u2) {
     //u1: person who hanged up => inform u2 that u1 hanged up

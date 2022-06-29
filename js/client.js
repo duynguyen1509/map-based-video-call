@@ -13,6 +13,7 @@ let myStream = null;
 let currentUser = null;
 const peers = {};
 let currentRoom = 0;
+Client.tutor = null;
 
 Client.getCurrentUser = function () {
   return currentUser;
@@ -66,7 +67,11 @@ navigator.mediaDevices
       peers[call.peer] = call;
       console.log(peers);
       //listen and answer to the call
-      call.answer(stream); //answer the call by sending them our current stream
+      if (call.peer !== Client.tutor)
+        call.answer(
+          stream
+        ); //answer the call by sending them our current stream
+      else call.answer(); //answer the call from tutor w/o sending stream back
       const video = document.createElement("video");
       call.on("stream", (userVideoStream) => {
         addVideoStream(video, userVideoStream);
@@ -89,12 +94,12 @@ Client.sendTest = function () {
   Client.socket.emit("test");
 };
 
-Client.askNewPlayer = function (n,r) {
+Client.askNewPlayer = function (n, r) {
   myPeer.on("open", (uid) => {
     Client.socket.emit("newplayer", uid, n, r); //trigger new player event
     currentUser = uid;
 
-    console.log(n+r +"Test");
+    console.log(n + r + "Test");
     // Client.socket.emit("join-room", ROOM_ID, uid);
   });
 };
@@ -103,9 +108,9 @@ Client.sendClick = function (x, y) {
   Client.socket.emit("click", { x: x, y: y });
 };
 
-Client.setTint = function() {
+Client.setTint = function () {
   Client.socket.emit("tint");
-  console.log("Client.steTint -> Client.socket.emit(tint);")
+  console.log("Client.steTint -> Client.socket.emit(tint);");
 };
 
 Client.socket.on("newplayer", function (data) {
@@ -117,8 +122,14 @@ Client.socket.on("join-room", function (player) {
   // Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r);
   setTimeout(() => {
     connectToNewUser(player.id, myStream); //send current stream to new user (peerJS)
-  }, 1000);
+  }, 100);
 });
+Client.socket.on("call-tutand", function (uid) {
+  setTimeout(() => {
+    connectToNewUser(uid, myStream); //send current stream to the tutand
+  }, 100);
+});
+
 Client.socket.on("user-left", function (uid) {
   console.log("user left room: ", uid);
   endCall(uid);
@@ -147,7 +158,14 @@ Client.socket.on("call-closed", function (uid) {
 Client.socket.on("allplayers", function (data) {
   console.log("all players: ", data);
   for (var i = 0; i < data.length; i++) {
-    Game.addNewPlayer(data[i].id, data[i].x, data[i].y, data[i].t, data[i].r, data[i].n);
+    Game.addNewPlayer(
+      data[i].id,
+      data[i].x,
+      data[i].y,
+      data[i].t,
+      data[i].r,
+      data[i].n
+    );
   }
 
   Client.socket.on("move", function (data) {
