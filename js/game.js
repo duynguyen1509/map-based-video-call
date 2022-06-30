@@ -23,6 +23,7 @@ Game.preload = function () {
 };
 
 Game.create = function () {
+  game.physics.startSystem(Phaser.Physics.ARCADE);
   Game.playerMap = {}; //this empty object will be useful later on to keep track of players.
   var testKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
   testKey.onDown.add(Client.sendTest, this);
@@ -66,6 +67,9 @@ Game.addNewPlayer = function (id, x, y, t, r, n) {
     default:
       Game.playerMap[id] = game.add.sprite(x, y, "d");
   }
+
+  game.physics.enable(Game.playerMap[id]);
+  Game.playerMap[id].body.collideWorldBounds=true;
   if (t) {
     //updates tint on load
     Game.playerMap[id].tint = 0xff0000;
@@ -83,6 +87,8 @@ Game.addNewPlayer = function (id, x, y, t, r, n) {
 };
 
 Game.movePlayer = function (id, x, y) {
+  x -= 8;
+  y -= 8;
   //moves players and changes room if x and y fall into positions
   // console.log("Aktueller Raum ", Game.z[id]);
   var player = Game.playerMap[id];
