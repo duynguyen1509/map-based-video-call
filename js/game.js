@@ -134,11 +134,11 @@ Game.returnRoom = function (x, y) {
   if (x >= 112 && x <= 208 && y >= 32 && y < 80) {
     return 10;
   }
-  if (x > 208 && x <= 320 && y >= 128 && y <= 176) {
+  if (x > 208 && x <= 320 && y >= 96 && y <= 144) {
     return 1;
-  } else if (x > 208 && x <= 320 && y >= 176 && y <= 218) {
+  } else if (x > 208 && x <= 320 && y > 144 && y <= 192) {
     return 2;
-  } else if (x > 208 && x <= 320 && y >= 219 && y <= 260) {
+  } else if (x > 208 && x <= 320 && y > 192 && y <= 240) {
     return 3;
   } else {
     return 0;
