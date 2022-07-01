@@ -157,11 +157,19 @@ Game.returnRoom = function (x, y) {
   if (x >= 112 && x < 208 && y >= 32 && y < 80) {
     return 10;
   }
+<<<<<<< HEAD
   if (x >= 208 && x < 320 && y >= 112 && y < 160) {
     return 1;
   } else if (x >= 208 && x < 320 && y >= 160 && y < 208) {
     return 2;
   } else if (x >= 208 && x < 320 && y >= 208 && y < 256) {
+=======
+  if (x > 208 && x <= 320 && y >= 96 && y <= 144) {
+    return 1;
+  } else if (x > 208 && x <= 320 && y > 144 && y <= 192) {
+    return 2;
+  } else if (x > 208 && x <= 320 && y > 192 && y <= 240) {
+>>>>>>> aad9866af2937646ad1a2beb4ca57f9c325f494e
     return 3;
   } else {
     return 0;
