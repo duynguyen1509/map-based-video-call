@@ -13,7 +13,6 @@ let myStream = null;
 let currentUser = null;
 const peers = {};
 let currentRoom = 0;
-Client.tutor = null;
 
 Client.getCurrentUser = function () {
   return currentUser;
@@ -67,12 +66,11 @@ navigator.mediaDevices
       peers[call.peer] = call;
       console.log(peers);
       //listen and answer to the call
-      if (call.peer !== Client.tutor)
-        call.answer(
-          stream
-        ); //answer the call by sending them our current stream
-      else call.answer(); //answer the call from tutor w/o sending stream back
       const video = document.createElement("video");
+      if (Game.tutorIsOnStage) {
+        call.answer(); //answer the call from tutor w/o sending stream back
+        video.classList.add("tutor-video");
+      } else call.answer(stream); //answer the call by sending them our current stream
       call.on("stream", (userVideoStream) => {
         addVideoStream(video, userVideoStream);
       }); // take in 'their' video streams
@@ -119,7 +117,6 @@ Client.socket.on("newplayer", function (data) {
 });
 Client.socket.on("join-room", function (player) {
   console.log("User " + player.id + " joined room");
-  // Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r);
   setTimeout(() => {
     connectToNewUser(player.id, myStream); //send current stream to new user (peerJS)
   }, 100);
@@ -130,8 +127,10 @@ Client.socket.on("call-tutand", function (uid) {
   }, 100);
 });
 
-Client.socket.on("user-left", function (uid) {
+Client.socket.on("user-left", function (roomId, uid) {
   console.log("user left room: ", uid);
+  if (roomId == 10) Game.tutorIsOnStage = false;
+  console.log("tutor left stage");
   endCall(uid);
 });
 

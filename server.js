@@ -74,8 +74,8 @@ io.on("connection", function (socket) {
     //leave room
     socket.leave(roomId);
     if (roomId == 10) {
-      socket.broadcast.emit("user-left", uid);
-    } else socket.to(roomId).emit("user-left", uid);
+      socket.broadcast.emit("user-left", roomId, uid);
+    } else socket.to(roomId).emit("user-left", roomId, uid);
   });
   socket.on("call-closed", function (u1, u2) {
     //u1: person who hanged up => inform u2 that u1 hanged up
