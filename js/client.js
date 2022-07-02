@@ -69,8 +69,10 @@ navigator.mediaDevices
       const video = document.createElement("video");
       if (Game.tutorIsOnStage) {
         call.answer(); //answer the call from tutor w/o sending stream back
-        video.classList.add("tutor-video");
       } else call.answer(stream); //answer the call by sending them our current stream
+      if (call.peer == Game.tutor) {
+        video.classList.add("tutor-video");
+      }
       call.on("stream", (userVideoStream) => {
         addVideoStream(video, userVideoStream);
       }); // take in 'their' video streams
@@ -140,6 +142,9 @@ function connectToNewUser(userId, stream) {
   peers[userId] = call;
   console.log(peers);
   const video = document.createElement("video");
+  if (userId == Game.tutor) {
+    video.classList.add("tutor-video");
+  }
   call.on("stream", (userVideoStream) => {
     addVideoStream(video, userVideoStream);
   }); // take in 'their' video streams

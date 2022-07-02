@@ -124,16 +124,18 @@ Game.movePlayer = function (id, x, y) {
   // );
   if (Game.roomChanged(Game.z[id], Game.returnRoom(x, y))) {
     if (
-      Game.returnRoom(x, y) == 10 &&
-      Client.getCurrentUser() != Game.tutor &&
-      Game.tutor == id
+      Client.getCurrentUser() != id &&
+      Game.tutor == id &&
+      Game.returnRoom(x, y) == 10
     ) {
+      //check if tutor get on the stage
       Game.tutorIsOnStage = true;
       console.log("tutor on stage");
       Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when tutor enter the stage then send the tutor our id
     }
 
     if (Client.getCurrentUser() == id) {
+      //check if currentUser change room
       Client.socket.emit("leave-room", Game.z[id], id); //leave old room
       console.log("Ich hab den Raum gewechselt zu: " + Game.returnRoom(x, y)); // hier client aufrufen
       if (Game.returnRoom(x, y) > 0 && Game.returnRoom(x, y) < 6)
@@ -155,7 +157,10 @@ Game.removePlayer = function (id) {
 Game.returnRoom = function (x, y) {
   //identifies room through x n' y
   if (x >= 112 && x < 208 && y >= 32 && y < 80) {
-    return 10;
+    return 10; //bühne
+  }
+  if (x >= 272 && x < 304 && y >= 32 && y < 80) {
+    return 11; //fragebereich
   }
   if (x > 208 && x <= 320 && y >= 96 && y <= 144) {
     return 1;
