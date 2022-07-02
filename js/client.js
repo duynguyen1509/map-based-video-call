@@ -11,7 +11,9 @@ const button_group = document.getElementById("btn-group");
 myVideo.muted = true;
 let myStream = null;
 let currentUser = null;
-const peers = {};
+// const peers = {};
+const callsTo = {};
+const callsFrom = {};
 let currentRoom = 0;
 
 Client.getCurrentUser = function () {
@@ -61,13 +63,30 @@ navigator.mediaDevices
       Client.setTint();
     };
 
+    if (Client.getCurrentUser() == Game.tutor) {
+      var openOrLockStage = document.createElement("button");
+      openOrLockStage.classList.add("btn", "btn-primary");
+      openOrLockStage.innerHTML = "Bühne freigeben"; //User is muted by default
+      button_group.appendChild(openOrLockStage);
+      openOrLockStage.onclick = function () {
+        Game.stageOpenedForEveryone = !Game.stageOpenedForEveryone;
+        openOrLockStage.innerHTML = Game.stageOpenedForEveryone
+          ? "Bühne sperren"
+          : "Bühne freigeben";
+        Client.socket.emit("stage-status-changed", Game.stageOpenedForEveryone);
+        removePlayersFromStage();
+      };
+    }
+
     myPeer.on("call", (call) => {
       console.log("call received", call);
-      peers[call.peer] = call;
-      console.log(peers);
+      // peers[call.peer] = call;
+      callsFrom[call.peer] = call;
+      // console.log("peers: ", peers);
+      console.log("callsFrom: ", callsFrom);
       //listen and answer to the call
       const video = document.createElement("video");
-      if (Game.tutorIsOnStage) {
+      if (Game.isOnStage[call.peer]) {
         call.answer(); //answer the call from tutor w/o sending stream back
       } else call.answer(stream); //answer the call by sending them our current stream
       if (call.peer == Game.tutor) {
@@ -78,7 +97,7 @@ navigator.mediaDevices
       }); // take in 'their' video streams
       call.on("close", () => {
         video.remove();
-        Client.socket.emit("call-closed", currentUser, call.peer); //currentUser:callee, call.peer:caller
+        Client.socket.emit("call-closed", currentUser, call.peer, true); //currentUser:callee, call.peer:caller, callReceived:boolean
       });
     });
   });
@@ -89,6 +108,20 @@ function addVideoStream(video, stream) {
   });
   videoGrid.append(video);
 }
+function removePlayersFromStage() {
+  //remove users form stage except for the tutor
+  for (const uid in Game.z) {
+    if (uid != Game.tutor && Game.z[uid] == 10) {
+      Client.socket.emit("move-player", uid, 145, 125);
+    }
+  }
+}
+Client.socket.on("move-player", function (uid, x, y) {
+  Game.movePlayer(uid, x, y);
+});
+Client.socket.on("stage-status-changed", function (stageOpenedForEveryone) {
+  Game.stageOpenedForEveryone = stageOpenedForEveryone;
+});
 Client.sendTest = function () {
   console.log("test sent");
   Client.socket.emit("test");
@@ -130,17 +163,25 @@ Client.socket.on("call-tutand", function (uid) {
 });
 
 Client.socket.on("user-left", function (roomId, uid) {
-  console.log("user left room: ", uid);
-  if (roomId == 10) Game.tutorIsOnStage = false;
-  console.log("tutor left stage");
-  endCall(uid);
+  console.log(`user ${uid} left room ${roomId}`);
+  if (roomId == 10) {
+    Game.isOnStage[uid] = false;
+    endCallFrom(uid);
+    console.log(`${uid} left stage`);
+  } else {
+    endCallFrom(uid);
+    endCallTo(uid);
+  }
+  // endCall(uid);
 });
 
 function connectToNewUser(userId, stream) {
   console.log("call user ", userId);
   const call = myPeer.call(userId, stream); //call user with userId and send our stream to that user
-  peers[userId] = call;
-  console.log(peers);
+  // peers[userId] = call;
+  callsTo[userId] = call;
+  // console.log("peers: ", peers);
+  console.log("callsTo: ", callsTo);
   const video = document.createElement("video");
   if (userId == Game.tutor) {
     video.classList.add("tutor-video");
@@ -150,14 +191,32 @@ function connectToNewUser(userId, stream) {
   }); // take in 'their' video streams
   call.on("close", () => {
     video.remove();
-    Client.socket.emit("call-closed", currentUser, userId); //currentUser:caller, userId:callee
+    Client.socket.emit("call-closed", currentUser, userId, false); //currentUser:caller, userId:callee, callReceived:boolean
   });
 }
-function endCall(uid) {
-  if (peers[uid]) peers[uid].close();
+
+// function endCall(uid){
+//     if (peers[uid]) {
+//     peers[uid].close();
+//     console.log(`call ${peers[uid].connectionId} with ${uid} ended`);
+//   }
+// }
+function endCallTo(uid) {
+  if (callsTo[uid]) {
+    callsTo[uid].close();
+    console.log(`call to ${callsTo[uid].connectionId} with ${uid} ended`);
+  }
 }
-Client.socket.on("call-closed", function (uid) {
-  endCall(uid);
+function endCallFrom(uid) {
+  if (callsFrom[uid]) {
+    callsFrom[uid].close();
+    console.log(`call from ${callsFrom[uid].connectionId} with ${uid} ended`);
+  }
+}
+Client.socket.on("call-closed", function (uid, callReceived) {
+  // endCall(uid);
+  if (callReceived) endCallTo(uid);
+  else endCallFrom(uid);
 });
 Client.socket.on("allplayers", function (data) {
   console.log("all players: ", data);
@@ -184,6 +243,8 @@ Client.socket.on("allplayers", function (data) {
   Client.socket.on("remove", function (id) {
     console.log("user: " + id + " disconnected!");
     Game.removePlayer(id);
-    endCall(id);
+    // endCall(id);
+    endCallFrom(id);
+    endCallTo(id);
   });
 });

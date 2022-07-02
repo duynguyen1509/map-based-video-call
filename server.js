@@ -40,8 +40,8 @@ io.on("connection", function (socket) {
     console.log("player " + uid + " connected");
     socket.player = {
       id: uid,
-      x: randomInt(100, 110),
-      y: randomInt(100, 110),
+      x: randomInt(140, 150),
+      y: randomInt(120, 130),
       t: false,
       r: parseInt(rolle),
       n: name,
@@ -53,6 +53,12 @@ io.on("connection", function (socket) {
       socket.player.x = data.x;
       socket.player.y = data.y;
       io.emit("move", socket.player);
+    });
+    socket.on("move-player", function (uid, x, y) {
+      io.emit("move-player", uid, x, y);
+    });
+    socket.on("stage-status-changed", function (stageOpenedForEveryone) {
+      socket.broadcast.emit("stage-status-changed", stageOpenedForEveryone);
     });
     socket.on("disconnect", function () {
       //io.emit(), which sends a message to all connected clients. We send the message 'remove', and send the id of the disconnected player to remove.
@@ -77,9 +83,9 @@ io.on("connection", function (socket) {
       socket.broadcast.emit("user-left", roomId, uid);
     } else socket.to(roomId).emit("user-left", roomId, uid);
   });
-  socket.on("call-closed", function (u1, u2) {
+  socket.on("call-closed", function (u1, u2, callReceived) {
     //u1: person who hanged up => inform u2 that u1 hanged up
-    io.to(u2).emit("call-closed", u1);
+    io.to(u2).emit("call-closed", u1, callReceived);
   });
   socket.on("test", function () {
     console.log("test received");

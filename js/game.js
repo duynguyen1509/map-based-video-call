@@ -1,6 +1,8 @@
 var Game = {};
 Game.tutor = null;
-Game.tutorIsOnStage = false;
+// Game.tutorIsOnStage = false;
+Game.isOnStage = {};
+Game.stageOpenedForEveryone = false; //true: everyone can join stage and stream; false: only tutor can stream on stage
 Game.init = function () {
   //will make the game keep reacting to messages from the server even when the game window doesn’t have focus
   game.stage.disableVisibilityChange = true;
@@ -89,12 +91,13 @@ Game.addNewPlayer = function (id, x, y, t, r, n) {
 
   if (
     Client.getCurrentUser() != id &&
-    Game.tutor == id &&
+    // Game.tutor == id &&
     Game.returnRoom(x, y) == 10
   ) {
     Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when tutor enter the stage then send the tutor our id
-    Game.tutorIsOnStage = true;
-    console.log("tutor on stage");
+    // Game.tutorIsOnStage = true;
+    Game.isOnStage[id] = true;
+    // console.log("tutor on stage");
   }
 };
 
@@ -109,6 +112,17 @@ Game.movePlayer = function (id, x, y) {
   var tween = game.add.tween(player);
   var tweenn = game.add.tween(name);
   var duration = distance * 3;
+  if (
+    !Game.stageOpenedForEveryone &&
+    id != Game.tutor &&
+    Game.returnRoom(x, y) == 10
+  ) {
+    //if the stage is locked by tutor then no one can access it except for the tutor
+    if (x >= 160) x = 218;
+    if (x < 160) x = 80;
+    if (y >= 56) y = 90;
+    if (y < 56) y = 22;
+  } //Room 10: x >= 112 && x < 208 && y >= 32 && y < 80
   tween.to({ x: x, y: y }, duration);
   tweenn.to({ x: x, y: y + 16 }, duration);
   tween.start();
@@ -125,19 +139,21 @@ Game.movePlayer = function (id, x, y) {
   if (Game.roomChanged(Game.z[id], Game.returnRoom(x, y))) {
     if (
       Client.getCurrentUser() != id &&
-      Game.tutor == id &&
+      // Game.tutor == id &&
       Game.returnRoom(x, y) == 10
     ) {
       //check if tutor get on the stage
-      Game.tutorIsOnStage = true;
-      console.log("tutor on stage");
+      // Game.tutorIsOnStage = true;
+      Game.isOnStage[id] = true;
+      // console.log("tutor on stage");
+      console.log(`Game.isOnStage[${id}]: `, Game.isOnStage[id]);
       Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when tutor enter the stage then send the tutor our id
     }
 
     if (Client.getCurrentUser() == id) {
       //check if currentUser change room
       Client.socket.emit("leave-room", Game.z[id], id); //leave old room
-      console.log("Ich hab den Raum gewechselt zu: " + Game.returnRoom(x, y)); // hier client aufrufen
+      // console.log("Ich hab den Raum gewechselt zu: " + Game.returnRoom(x, y)); // hier client aufrufen
       if (Game.returnRoom(x, y) > 0 && Game.returnRoom(x, y) < 6)
         Client.socket.emit("join-room", Game.returnRoom(x, y), id); //...join new room
     }
