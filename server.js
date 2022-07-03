@@ -16,11 +16,11 @@ app.use("/css", express.static(__dirname + "/css"));
 app.use("/js", express.static(__dirname + "/js"));
 app.use("/assets", express.static(__dirname + "/assets"));
 /** */
-server.stageOpened = false;
+
 /**Routing */
 app.get("/", (req, res) => {
   // res.redirect(`/${uuidV4()}`); //random roomId
-  res.render("room", { stageOpened: server.stageOpened });
+  res.render("room");
 });
 
 app.get("/:roomId", (req, res) => {
@@ -33,7 +33,9 @@ server.listen(process.env.PORT || 8081, function () {
   console.log("Listening on " + server.address().port);
 });
 
+server.stageOpened = false; //true: normal users can get on the stage; false: just the tutor can
 io.on("connection", function (socket) {
+  io.emit("initial-stage-status", server.stageOpened); //update current state of the stage for all new connected player
   console.log("socket id: ", socket.id);
   //socket used to establish the connection
   socket.on("newplayer", function (uid, name, rolle) {
@@ -55,7 +57,7 @@ io.on("connection", function (socket) {
       io.emit("move", socket.player);
     });
     socket.on("move-player", function (uid, x, y) {
-      io.emit("move-player", uid, x, y);
+      socket.to(uid).emit("move-player", x, y);
     });
     socket.on("stage-status-changed", function (stageOpenedForEveryone) {
       server.stageOpened = stageOpenedForEveryone;

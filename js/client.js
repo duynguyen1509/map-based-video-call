@@ -15,11 +15,14 @@ let currentUser = null;
 const callsTo = {};
 const callsFrom = {};
 let currentRoom = 0;
-Game.stageOpenedForEveryone = stageOpenedForEveryone === "true";
+// Game.stageOpenedForEveryone = stageOpenedForEveryone === "true";
 
 Client.getCurrentUser = function () {
   return currentUser;
 };
+Client.socket.on("initial-stage-status", function (stageState) {
+  Game.stageOpenedForEveryone = stageState;
+});
 navigator.mediaDevices
   .getUserMedia({
     video: true,
@@ -124,9 +127,8 @@ function removePlayersFromStage() {
   }
 }
 
-Client.socket.on("move-player", function (uid, x, y) {
-  if (Client.getCurrentUser() == uid)
-    Client.socket.emit("click", { x: x, y: y });
+Client.socket.on("move-player", function (x, y) {
+  Client.socket.emit("click", { x: x, y: y });
 });
 Client.socket.on("stage-status-changed", function (stageOpenedForEveryone) {
   Game.stageOpenedForEveryone = stageOpenedForEveryone;
