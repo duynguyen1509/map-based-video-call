@@ -123,8 +123,10 @@ function removePlayersFromStage() {
     }
   }
 }
+
 Client.socket.on("move-player", function (uid, x, y) {
-  Game.movePlayer(uid, x, y);
+  if (Client.getCurrentUser() == uid)
+    Client.socket.emit("click", { x: x, y: y });
 });
 Client.socket.on("stage-status-changed", function (stageOpenedForEveryone) {
   Game.stageOpenedForEveryone = stageOpenedForEveryone;
