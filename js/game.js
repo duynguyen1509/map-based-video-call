@@ -1,8 +1,7 @@
 var Game = {};
-Game.tutor = null;
+Game.tutor = "";
 // Game.tutorIsOnStage = false;
 Game.isOnStage = {};
-Game.stageOpenedForEveryone = false; //true: everyone can join stage and stream; false: only tutor can stream on stage
 Game.init = function () {
   //will make the game keep reacting to messages from the server even when the game window doesn’t have focus
   game.stage.disableVisibilityChange = true;

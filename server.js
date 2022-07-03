@@ -16,11 +16,11 @@ app.use("/css", express.static(__dirname + "/css"));
 app.use("/js", express.static(__dirname + "/js"));
 app.use("/assets", express.static(__dirname + "/assets"));
 /** */
-
+var stageOpened = false;
 /**Routing */
 app.get("/", (req, res) => {
   // res.redirect(`/${uuidV4()}`); //random roomId
-  res.render("room");
+  res.render("room", { stageOpened: stageOpened });
 });
 
 app.get("/:roomId", (req, res) => {
@@ -58,6 +58,7 @@ io.on("connection", function (socket) {
       io.emit("move-player", uid, x, y);
     });
     socket.on("stage-status-changed", function (stageOpenedForEveryone) {
+      stageOpened = stageOpenedForEveryone;
       socket.broadcast.emit("stage-status-changed", stageOpenedForEveryone);
     });
     socket.on("disconnect", function () {

@@ -15,6 +15,7 @@ let currentUser = null;
 const callsTo = {};
 const callsFrom = {};
 let currentRoom = 0;
+Game.stageOpenedForEveryone = stageOpenedForEveryone === "true";
 
 Client.getCurrentUser = function () {
   return currentUser;
@@ -66,7 +67,9 @@ navigator.mediaDevices
     if (Client.getCurrentUser() == Game.tutor) {
       var openOrLockStage = document.createElement("button");
       openOrLockStage.classList.add("btn", "btn-primary");
-      openOrLockStage.innerHTML = "Bühne freigeben"; //User is muted by default
+      openOrLockStage.innerHTML = Game.stageOpenedForEveryone
+        ? "Bühne sperren"
+        : "Bühne freigeben";
       button_group.appendChild(openOrLockStage);
       openOrLockStage.onclick = function () {
         Game.stageOpenedForEveryone = !Game.stageOpenedForEveryone;
@@ -74,6 +77,10 @@ navigator.mediaDevices
           ? "Bühne sperren"
           : "Bühne freigeben";
         Client.socket.emit("stage-status-changed", Game.stageOpenedForEveryone);
+        console.log(
+          "Game.stageOpenedForEveryone: ",
+          Game.stageOpenedForEveryone
+        );
         removePlayersFromStage();
       };
     }
