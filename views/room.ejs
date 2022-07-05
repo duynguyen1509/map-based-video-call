@@ -70,7 +70,7 @@
         border: none;
         background: #f1f1f1;
         resize: none;
-        min-height: 200px;
+        min-height: 50px;
       }
 
       .form-container .m {
@@ -81,6 +81,8 @@
         background: #ffffff;
         resize: none;
         min-height: 20px;
+        max-height: 400px;
+        overflow-x:scroll;
       }
 
       /* When the textarea gets focus, do something */
@@ -177,8 +179,8 @@
             <div class="chat-popup" id="myForm">
               <div class="form-container">
                 <h1>Chat</h1>
-                <textarea id="inputMessage" placeholder="Type message.." name="msg" required></textarea>
                 <div class = "m" id="messages"></div>
+                <textarea id="inputMessage" placeholder="Type message.." name="msg" required></textarea>
                 <button class="btn btn-success" onclick="sendMessage()">Send</button>
                 <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
               </div>
