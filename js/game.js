@@ -27,6 +27,7 @@ Game.preload = function () {
 Game.create = function () {
   game.physics.startSystem(Phaser.Physics.ARCADE);
   Game.playerMap = {}; //this empty object will be useful later on to keep track of players.
+  Game.name = {}; //object to retrieve Name of player in chat
   var testKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
   testKey.onDown.add(Client.sendTest, this);
   var map = game.add.tilemap("map");
@@ -81,7 +82,7 @@ Game.addNewPlayer = function (id, x, y, t, r, n) {
   } //save tint setting
 
   Game.z[id] = Game.returnRoom(x, y); //updates current video zone
-
+  Game.name[id] = n;
   Game.nameText[id] = game.add.text(x, y + 16, n, {
     //display player name
     fontSize: "8px",
@@ -196,6 +197,11 @@ Game.roomChanged = function (z1, z2) {
     return true;
   }
 };
+
+Game.returnName = function (id) {
+  return Game.name[id];
+}
+
 
 Game.tintPlayer = function (id, t) {
   //dynamic tint: even if not on load

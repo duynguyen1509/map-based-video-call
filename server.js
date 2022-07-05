@@ -93,6 +93,11 @@ io.on("connection", function (socket) {
   socket.on("test", function () {
     console.log("test received");
   });
+  
+  socket.on('new message', function (name, message) {
+    // Sende die Nachricht an alle Clients
+    socket.broadcast.emit('new message', name, message);
+    });
 });
 
 function getAllPlayers() {

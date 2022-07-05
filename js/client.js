@@ -4,6 +4,7 @@ let myPeer = null;
 Client.socket.on("connect", () => {
   myPeer = new Peer(Client.socket.id, {});
 });
+document.getElementById("myForm").style.display = "none";
 const videoGrid = document.getElementById("video-grid");
 // const myPeer = new Peer(undefined, {}); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
@@ -127,6 +128,29 @@ function removePlayersFromStage() {
   }
 }
 
+function openForm() {
+  document.getElementById("myForm").style.display = "block";
+}
+
+function closeForm() {
+  document.getElementById("myForm").style.display = "none";
+}
+
+function sendMessage(){
+  var message = document.getElementById("inputMessage").value;
+  var name = Game.returnName(Client.getCurrentUser());
+  document.getElementById("inputMessage").value="";
+  Client.socket.emit('new message', name, message);
+  // Create a p element:
+  const para = document.createElement("p");
+  // Create a text node:
+  const node = document.createTextNode(name + ": " + message);
+  // Append text node to the p element:
+  para.appendChild(node);
+  // Append the p element to the body:s
+  document.getElementById("messages").appendChild(para);
+}
+
 Client.socket.on("move-player", function (x, y) {
   Client.socket.emit("click", { x: x, y: y });
 });
@@ -154,7 +178,6 @@ Client.sendClick = function (x, y) {
 
 Client.setTint = function () {
   Client.socket.emit("tint");
-  console.log("Client.steTint -> Client.socket.emit(tint);");
 };
 
 Client.socket.on("newplayer", function (data) {
@@ -185,6 +208,17 @@ Client.socket.on("user-left", function (roomId, uid) {
   }
   // endCall(uid);
 });
+
+Client.socket.on('new message', function (name, message) {
+  // Create a p element:
+  const para = document.createElement("p");
+  // Create a text node:
+  const node = document.createTextNode(name + ": " + message);
+  // Append text node to the p element:
+  para.appendChild(node);
+  // Append the p element to the body:s
+  document.getElementById("messages").appendChild(para);
+  });
 
 function connectToNewUser(userId, stream) {
   console.log("call user ", userId);
