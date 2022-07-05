@@ -67,6 +67,16 @@ io.on("connection", function (socket) {
       //io.emit(), which sends a message to all connected clients. We send the message 'remove', and send the id of the disconnected player to remove.
       io.emit("remove", socket.player.id);
     });
+
+    socket.on("kick", function (name) {
+      var data = getAllPlayers();
+      for (var i = 0; i < data.length; i++) {
+          if (data[i].n == name){
+            io.emit("remove", data[i].id);
+          }
+      }
+    });
+
     socket.on("tint", function () {
       socket.player.t = !socket.player.t;
       io.emit("tint", socket.player);

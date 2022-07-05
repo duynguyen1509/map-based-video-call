@@ -87,6 +87,15 @@ navigator.mediaDevices
         );
         removePlayersFromStage();
       };
+
+      var kick = document.createElement("button");
+      kick.classList.add("btn", "btn-primary");
+      kick.innerHTML = "Kicken";
+      button_group.appendChild(kick);
+      kick.onclick = function (){
+        let kicked = prompt("Bitte Namen eingeben", "Name");
+        Client.socket.emit("kick", kicked);
+      }
     }
 
     myPeer.on("call", (call) => {
