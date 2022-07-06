@@ -4,7 +4,7 @@ let myPeer = null;
 Client.socket.on("connect", () => {
   myPeer = new Peer(Client.socket.id, {});
 });
-document.getElementById("myForm").style.display = "none";
+document.getElementById("myForm").style.display = "none"; // pop-up chat
 const videoGrid = document.getElementById("video-grid");
 // const myPeer = new Peer(undefined, {}); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
@@ -136,7 +136,7 @@ function removePlayersFromStage() {
     }
   }
 }
-
+// pop-up chat
 function openForm() {
   document.getElementById("myForm").style.display = "block";
 }
@@ -300,5 +300,9 @@ Client.socket.on("allplayers", function (data) {
     // endCall(id);
     endCallFrom(id);
     endCallTo(id);
+    if (id == currentUser){
+      document.getElementById("myForm").style.display = "none";
+      document.getElementById("chatbutton").style.display = "none";
+    }
   });
 });
