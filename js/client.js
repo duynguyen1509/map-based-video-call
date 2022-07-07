@@ -143,6 +143,7 @@ function openForm() {
 
 function closeForm() {
   document.getElementById("myForm").style.display = "none";
+  document.getElementById("chatbutton").style.backgroundColor = "#555";
 }
 
 function sendMessage(){
@@ -219,6 +220,7 @@ Client.socket.on("user-left", function (roomId, uid) {
 });
 
 Client.socket.on('new message', function (name, message) {
+  document.getElementById("chatbutton").style.backgroundColor = "red";
   // Create a p element:
   const para = document.createElement("p");
   // Create a text node:
