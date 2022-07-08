@@ -322,6 +322,7 @@ Client.socket.on("allplayers", function (data) {
     endCallFrom(id);
     endCallTo(id);
     if (id == currentUser){
+      alert("Du wurdest aus dem Tutorium entfernt");
       document.getElementById("myForm").style.display = "none";
       document.getElementById("chatbutton").style.display = "none";
     }
