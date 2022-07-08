@@ -7,10 +7,32 @@
       body {font-family: 'VT323', monospace;}
       * {box-sizing: border-box;}
 
+      #intro {
+        background-image: url(/assets/map/example_map.png);
+        background-size: cover;
+        height: 100vh;
+      }
+
+      /* Height for devices larger than 576px */
+      @media (min-width: 992px) {
+        #intro {
+          margin-top: -58.59px;
+        }
+      }
+
       #video-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, 200px);
-        grid-auto-rows: 200px;
+        grid-template-columns: repeat(auto-fill, 240px);
+        grid-auto-rows: 240px;
+      }
+
+      #game {
+        padding: 10px;
+      }
+
+      #videocontainer {
+        width:auto;
+        overflow-y: scroll;
       }
 
       video {
@@ -26,9 +48,7 @@
         padding: 0px;
         border-color: blue;
       }
-     .col-sm-6 {
-        background-color:lightgray;
-      }
+    
       
 
       /* Button used to open the chat form - fixed at the bottom of the page */
@@ -82,7 +102,7 @@
         resize: none;
         min-height: 20px;
         max-height: 400px;
-        overflow-x:scroll;
+        overflow-y:scroll;
       }
 
       /* When the textarea gets focus, do something */
@@ -141,23 +161,28 @@
       </header>
     </div>
     <!-- container mit den videos und dem "game" -->
-    <div class="container mt-5">
-      <div class="row">
-        <div class="col-sm-6">
-          <div id="game"></div>
-          <br></br>
-          <div class="btn-group" role="group" id="btn-group">
-            <!-- <button type="button" class="btn btn-primary">Left</button>
-            <button type="button" class="btn btn-primary">Middle</button>
-            <button type="button" class="btn btn-primary">Right</button> -->
+  
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-6">
+            <div id="game"></div>
+            <div class="btn-group" role="group" id="btn-group">
+              <!-- <button type="button" class="btn btn-primary">Left</button>
+              <button type="button" class="btn btn-primary">Middle</button>
+              <button type="button" class="btn btn-primary">Right</button> -->
+              </div>
+            </div>
+          <div class="col-sm-6" id="videocontainer">
+            <div class="container">
+              <div id="video-grid"></div>
             </div>
           </div>
-        <div class="col-sm-6" id="bluepart">
-          <div class="container">
-            <div id="video-grid"></div>
           </div>
         </div>
-        </div>
+
+      
+    
+
             <div> 
         <!-- popup-Chat -->
             <button id="chatbutton" class="open-button" onclick="openForm()">Chat</button>
@@ -169,8 +194,11 @@
                 <button class="btn btn-success" onclick="sendMessage()">Send</button>
                 <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
               </div>
-            </div>   
-      </div>
+            </div>
+          </div>
+      
+    
+  
     
 
     </body>
