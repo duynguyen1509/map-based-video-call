@@ -202,7 +202,6 @@ Game.returnName = function (id) {
   return Game.name[id];
 }
 
-
 Game.tintPlayer = function (id, t) {
   //dynamic tint: even if not on load
   if (t) {

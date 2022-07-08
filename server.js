@@ -33,6 +33,7 @@ server.listen(process.env.PORT || 8081, function () {
   console.log("Listening on " + server.address().port);
 });
 
+server.chatOpened = true;
 server.stageOpened = false; //true: normal users can get on the stage; false: just the tutor can
 io.on("connection", function (socket) {
   io.emit("initial-stage-status", server.stageOpened); //update current state of the stage for all new connected player
@@ -67,7 +68,7 @@ io.on("connection", function (socket) {
       //io.emit(), which sends a message to all connected clients. We send the message 'remove', and send the id of the disconnected player to remove.
       io.emit("remove", socket.player.id);
     });
-
+    // kick player through username
     socket.on("kick", function (name) {
       var data = getAllPlayers();
       for (var i = 0; i < data.length; i++) {
@@ -76,11 +77,16 @@ io.on("connection", function (socket) {
           }
       }
     });
-
+    // implemantation of handup
     socket.on("tint", function () {
       socket.player.t = !socket.player.t;
       io.emit("tint", socket.player);
     });
+
+    socket.on("chat", function() {
+      server.chatOpened = !server.chatOpened;
+      io.emit("chat", server.chatOpened);
+    })
   });
   socket.on("join-room", function (roomId, uid) {
     socket.join(roomId); //audio video and the game are separate rooms

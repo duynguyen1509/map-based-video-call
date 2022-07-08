@@ -1,5 +1,6 @@
 var Client = {};
 Client.socket = io.connect();
+var stageStatus = {};
 let myPeer = null;
 Client.socket.on("connect", () => {
   myPeer = new Peer(Client.socket.id, {});
@@ -24,6 +25,7 @@ Client.getCurrentUser = function () {
 Client.socket.on("initial-stage-status", function (stageState) {
   Game.stageOpenedForEveryone = stageState;
 });
+
 navigator.mediaDevices
   .getUserMedia({
     video: true,
@@ -95,6 +97,14 @@ navigator.mediaDevices
       kick.onclick = function (){
         let kicked = prompt("Bitte Namen eingeben", "Name");
         Client.socket.emit("kick", kicked);
+      }
+
+      var chat = document.createElement("button");
+      chat.classList.add("btn", "btn-primary");
+      chat.innerHTML = "Chat";
+      button_group.appendChild(chat);
+      chat.onclick = function (){
+        Client.socket.emit("chat");
       }
     }
 
@@ -230,6 +240,15 @@ Client.socket.on('new message', function (name, message) {
   // Append the p element to the body:s
   document.getElementById("messages").appendChild(para);
   });
+
+Client.socket.on("chat", function(open){
+  if (open == false){
+    closeForm();
+    document.getElementById("chatbutton").style.display = "none";}
+  else {
+    document.getElementById("chatbutton").style.display = "block";
+  }
+});
 
 function connectToNewUser(userId, stream) {
   console.log("call user ", userId);
