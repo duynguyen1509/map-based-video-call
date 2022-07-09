@@ -217,11 +217,41 @@ Game.login = async function () {
   myModal.show();
 }
 
-Game.loginData = function () {
-  console.log("Uweee");
-  console.log(document.getElementById("pwd").value);
-  console.log(document.getElementById("email").value);
+Game.loginRole = function () {
   var name = document.getElementById("email").value;
-  var role = document.getElementById("pwd").value;
-  Client.askNewPlayer(name, role);
+  var pw = document.getElementById("pwd").value;
+  console.log(pw);
+  var role;
+
+  if(pw == "Tutor"){ //tutor loggt sich ein
+    role = 3;
+    console.log(name + "modalworks: " + role);
+    Client.askNewPlayer(name,role);
+  }
+  else if (pw == "Tutand"){
+    let modal2 = new bootstrap.Modal(document.getElementById('modal2'), {});
+    modal2.show();
+  }
+  else {
+    alert("Falscher Room-Key");
+    Game.login();
+  }
+
+}
+
+Game.loginTutand = function() {
+  var name = document.getElementById("email").value;
+  var role;
+  if (document.getElementById("radio1").checked){
+    role = 0;
+  }
+  else if (document.getElementById("radio2").checked){
+    role = 1;
+  } 
+  else {
+    role = 2;
+  }
+  console.log(name + "tutandworks: " + role);
+  Client.askNewPlayer(name,role); //Tutand Loggt sich eine
+
 }

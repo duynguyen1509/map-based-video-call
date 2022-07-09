@@ -205,7 +205,6 @@
                 <!-- Modal Header -->
                 <div class="modal-header">
                   <h4 class="modal-title">Login</h4>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
           
                 <!-- Modal body -->
@@ -223,7 +222,43 @@
                 </div>
           
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="Game.loginData()">Login</button>
+                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="Game.loginRole()">Login</button>
+                </div> 
+          
+              </div>
+            </div>
+          </div>
+
+          <!-- The Modal -->
+          <div class="modal" id="modal2">
+            <div class="modal-dialog">
+              <div class="modal-content">
+          
+                <!-- Modal Header -->
+                <div class="modal-header">
+                  <h4 class="modal-title">Login</h4>
+                </div>
+          
+                <!-- Modal body -->
+                <div class="modal-body">
+                  <div class = "container">
+                    <div class="form-check">
+                      <input type="radio" class="form-check-input" id="radio1" name="optradio" value="option1" checked>m
+                      <label class="form-check-label" for="radio1"></label>
+                    </div>
+                    <div class="form-check">
+                      <input type="radio" class="form-check-input" id="radio2" name="optradio" value="option2">f
+                      <label class="form-check-label" for="radio2"></label>
+                    </div>
+                    <div class="form-check">
+                      <input type="radio" class="form-check-input" id="radio3" name="optradio" value="option3">d
+                      <label class="form-check-label" for="radio3"></label>
+                    </div>
+                  </div>
+                </div>
+          
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="Game.loginTutand()">Login</button>
                 </div> 
           
               </div>
