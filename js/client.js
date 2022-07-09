@@ -10,6 +10,7 @@ const videoGrid = document.getElementById("video-grid");
 // const myPeer = new Peer(undefined, {}); //connects user to peer server, which takes all WebRTC infos for a user and turn into userId
 const myVideo = document.createElement("video");
 const button_group = document.getElementById("btn-group");
+const button_group2 = document.getElementById("btn-group2");
 myVideo.muted = true;
 let myStream = null;
 let currentUser = null;
@@ -76,7 +77,7 @@ navigator.mediaDevices
       openOrLockStage.innerHTML = Game.stageOpenedForEveryone
         ? "Bühne sperren"
         : "Bühne freigeben";
-      button_group.appendChild(openOrLockStage);
+      button_group2.appendChild(openOrLockStage);
       openOrLockStage.onclick = function () {
         Game.stageOpenedForEveryone = !Game.stageOpenedForEveryone;
         openOrLockStage.innerHTML = Game.stageOpenedForEveryone
@@ -93,7 +94,7 @@ navigator.mediaDevices
       var kick = document.createElement("button");
       kick.classList.add("btn", "btn-primary");
       kick.innerHTML = "Kicken";
-      button_group.appendChild(kick);
+      button_group2.appendChild(kick);
       kick.onclick = function (){
         let kicked = prompt("Bitte Namen eingeben", "Name");
         Client.socket.emit("kick", kicked);
@@ -102,7 +103,7 @@ navigator.mediaDevices
       var chat = document.createElement("button");
       chat.classList.add("btn", "btn-primary");
       chat.innerHTML = "Chat";
-      button_group.appendChild(chat);
+      button_group2.appendChild(chat);
       chat.onclick = function (){
         Client.socket.emit("chat");
       }
