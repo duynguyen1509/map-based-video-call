@@ -25,6 +25,7 @@ Game.preload = function () {
 };
 
 Game.create = function () {
+  Game.login();
   game.physics.startSystem(Phaser.Physics.ARCADE);
   Game.playerMap = {}; //this empty object will be useful later on to keep track of players.
   Game.name = {}; //object to retrieve Name of player in chat
@@ -40,9 +41,9 @@ Game.create = function () {
   Game.nameText = {}; //Displays Player Name
   Game.z = {}; //zugeordneter Raum
   layer.events.onInputUp.add(Game.getCoordinates, this); //position of the player who clicked can be updated for everyone
-  let person = prompt("Bitte Namen eingeben", "Name");
-  let rolle = prompt("Bitte Rolle eingeben", "0-3");
-  Client.askNewPlayer(person, rolle); //client will notify the server that a new player should be created
+  //let person = prompt("Bitte Namen eingeben", "Name");
+  //let rolle = prompt("Bitte Rolle eingeben", "0-3");
+  //Client.askNewPlayer(person, rolle); //client will notify the server that a new player should be created
 };
 
 Game.getCoordinates = function (layer, pointer) {
@@ -210,3 +211,17 @@ Game.tintPlayer = function (id, t) {
     Game.playerMap[id].tint = 0xffffff;
   } //save tint setting
 };
+
+Game.login = async function () {
+  let myModal = new bootstrap.Modal(document.getElementById('myModal'), {});
+  myModal.show();
+}
+
+Game.loginData = function () {
+  console.log("Uweee");
+  console.log(document.getElementById("pwd").value);
+  console.log(document.getElementById("email").value);
+  var name = document.getElementById("email").value;
+  var role = document.getElementById("pwd").value;
+  Client.askNewPlayer(name, role);
+}

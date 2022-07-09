@@ -183,6 +183,7 @@ Client.sendTest = function () {
 };
 
 Client.askNewPlayer = function (n, r) {
+  console.log(n + " " + r)
   myPeer.on("open", (uid) => {
     Client.socket.emit("newplayer", uid, n, r); //trigger new player event
     currentUser = uid;
