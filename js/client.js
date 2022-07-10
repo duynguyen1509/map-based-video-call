@@ -1,9 +1,13 @@
 var Client = {};
 Client.socket = io.connect();
 var stageStatus = {};
-let myPeer = null;
+let myPeer;
 Client.socket.on("connect", () => {
   myPeer = new Peer(Client.socket.id, {});
+  myPeer.on("open", (uid) => {
+    currentUser = uid;
+    // Client.socket.emit("join-room", ROOM_ID, uid);
+  });
 });
 document.getElementById("myForm").style.display = "none"; // pop-up chat
 const videoGrid = document.getElementById("video-grid");
@@ -71,44 +75,6 @@ navigator.mediaDevices
       Client.setTint();
     };
 
-    if (Client.getCurrentUser() == Game.tutor) {
-      var openOrLockStage = document.createElement("button");
-      openOrLockStage.classList.add("btn", "btn-primary");
-      openOrLockStage.innerHTML = Game.stageOpenedForEveryone
-        ? "Bühne sperren"
-        : "Bühne freigeben";
-      button_group2.appendChild(openOrLockStage);
-      openOrLockStage.onclick = function () {
-        Game.stageOpenedForEveryone = !Game.stageOpenedForEveryone;
-        openOrLockStage.innerHTML = Game.stageOpenedForEveryone
-          ? "Bühne sperren"
-          : "Bühne freigeben";
-        Client.socket.emit("stage-status-changed", Game.stageOpenedForEveryone);
-        console.log(
-          "Game.stageOpenedForEveryone: ",
-          Game.stageOpenedForEveryone
-        );
-        removePlayersFromStage();
-      };
-
-      var kick = document.createElement("button");
-      kick.classList.add("btn", "btn-primary");
-      kick.innerHTML = "Kicken";
-      button_group2.appendChild(kick);
-      kick.onclick = function (){
-        let kicked = prompt("Bitte Namen eingeben", "Name");
-        Client.socket.emit("kick", kicked);
-      }
-
-      var chat = document.createElement("button");
-      chat.classList.add("btn", "btn-primary");
-      chat.innerHTML = "Chat";
-      button_group2.appendChild(chat);
-      chat.onclick = function (){
-        Client.socket.emit("chat");
-      }
-    }
-
     myPeer.on("call", (call) => {
       console.log("call received", call);
       // peers[call.peer] = call;
@@ -157,11 +123,11 @@ function closeForm() {
   document.getElementById("chatbutton").style.backgroundColor = "#555";
 }
 
-function sendMessage(){
+function sendMessage() {
   var message = document.getElementById("inputMessage").value;
   var name = Game.returnName(Client.getCurrentUser());
-  document.getElementById("inputMessage").value="";
-  Client.socket.emit('new message', name, message);
+  document.getElementById("inputMessage").value = "";
+  Client.socket.emit("new message", name, message);
   // Create a p element:
   const para = document.createElement("p");
   // Create a text node:
@@ -184,14 +150,8 @@ Client.sendTest = function () {
 };
 
 Client.askNewPlayer = function (n, r) {
-  console.log(n + " " + r)
-  myPeer.on("open", (uid) => {
-    Client.socket.emit("newplayer", uid, n, r); //trigger new player event
-    currentUser = uid;
-
-    console.log(n + r + "Test");
-    // Client.socket.emit("join-room", ROOM_ID, uid);
-  });
+  Client.socket.emit("newplayer", currentUser, n, r); //trigger new player event
+  console.log("newplayer: " + n + r);
 };
 
 Client.sendClick = function (x, y) {
@@ -231,7 +191,7 @@ Client.socket.on("user-left", function (roomId, uid) {
   // endCall(uid);
 });
 
-Client.socket.on('new message', function (name, message) {
+Client.socket.on("new message", function (name, message) {
   document.getElementById("chatbutton").style.backgroundColor = "red";
   // Create a p element:
   const para = document.createElement("p");
@@ -241,13 +201,13 @@ Client.socket.on('new message', function (name, message) {
   para.appendChild(node);
   // Append the p element to the body:s
   document.getElementById("messages").appendChild(para);
-  });
+});
 
-Client.socket.on("chat", function(open){
-  if (open == false){
+Client.socket.on("chat", function (open) {
+  if (open == false) {
     closeForm();
-    document.getElementById("chatbutton").style.display = "none";}
-  else {
+    document.getElementById("chatbutton").style.display = "none";
+  } else {
     document.getElementById("chatbutton").style.display = "block";
   }
 });
@@ -323,10 +283,45 @@ Client.socket.on("allplayers", function (data) {
     // endCall(id);
     endCallFrom(id);
     endCallTo(id);
-    if (id == currentUser){
+    if (id == currentUser) {
       alert("Du wurdest aus dem Tutorium entfernt");
       document.getElementById("myForm").style.display = "none";
       document.getElementById("chatbutton").style.display = "none";
     }
   });
 });
+
+Client.addTutorButtons = function () {
+  var openOrLockStage = document.createElement("button");
+  openOrLockStage.classList.add("btn", "btn-primary");
+  openOrLockStage.innerHTML = Game.stageOpenedForEveryone
+    ? "Bühne sperren"
+    : "Bühne freigeben";
+  button_group2.appendChild(openOrLockStage);
+  openOrLockStage.onclick = function () {
+    Game.stageOpenedForEveryone = !Game.stageOpenedForEveryone;
+    openOrLockStage.innerHTML = Game.stageOpenedForEveryone
+      ? "Bühne sperren"
+      : "Bühne freigeben";
+    Client.socket.emit("stage-status-changed", Game.stageOpenedForEveryone);
+    console.log("Game.stageOpenedForEveryone: ", Game.stageOpenedForEveryone);
+    removePlayersFromStage();
+  };
+
+  var kick = document.createElement("button");
+  kick.classList.add("btn", "btn-primary");
+  kick.innerHTML = "Kicken";
+  button_group2.appendChild(kick);
+  kick.onclick = function () {
+    let kicked = prompt("Bitte Namen eingeben", "Name");
+    Client.socket.emit("kick", kicked);
+  };
+
+  var chat = document.createElement("button");
+  chat.classList.add("btn", "btn-primary");
+  chat.innerHTML = "Chat";
+  button_group2.appendChild(chat);
+  chat.onclick = function () {
+    Client.socket.emit("chat");
+  };
+};

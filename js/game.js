@@ -25,7 +25,7 @@ Game.preload = function () {
 };
 
 Game.create = function () {
-  //Game.login();
+  Game.login();
   game.physics.startSystem(Phaser.Physics.ARCADE);
   Game.playerMap = {}; //this empty object will be useful later on to keep track of players.
   Game.name = {}; //object to retrieve Name of player in chat
@@ -41,9 +41,9 @@ Game.create = function () {
   Game.nameText = {}; //Displays Player Name
   Game.z = {}; //zugeordneter Raum
   layer.events.onInputUp.add(Game.getCoordinates, this); //position of the player who clicked can be updated for everyone
-  let person = prompt("Bitte Namen eingeben", "Name");
-  let rolle = prompt("Bitte Rolle eingeben", "0-3");
-  Client.askNewPlayer(person, rolle); //client will notify the server that a new player should be created
+  // let person = prompt("Bitte Namen eingeben", "Name");
+  // let rolle = prompt("Bitte Rolle eingeben", "0-3");
+  // Client.askNewPlayer(person, rolle); //client will notify the server that a new player should be created
 };
 
 Game.getCoordinates = function (layer, pointer) {
@@ -201,7 +201,7 @@ Game.roomChanged = function (z1, z2) {
 
 Game.returnName = function (id) {
   return Game.name[id];
-}
+};
 
 Game.tintPlayer = function (id, t) {
   //dynamic tint: even if not on load
@@ -213,9 +213,9 @@ Game.tintPlayer = function (id, t) {
 };
 
 Game.login = async function () {
-  let myModal = new bootstrap.Modal(document.getElementById('myModal'), {});
+  let myModal = new bootstrap.Modal(document.getElementById("myModal"), {});
   myModal.show();
-}
+};
 
 Game.loginRole = function () {
   var name = document.getElementById("email").value;
@@ -223,35 +223,31 @@ Game.loginRole = function () {
   console.log(pw);
   var role;
 
-  if(pw == "Tutor"){ //tutor loggt sich ein
+  if (pw == "Tutor") {
+    //tutor loggt sich ein
     role = 3;
     console.log(name + "modalworks: " + role);
-    Client.askNewPlayer(name,role);
-  }
-  else if (pw == "Tutand"){
-    let modal2 = new bootstrap.Modal(document.getElementById('modal2'), {});
+    Client.askNewPlayer(name, role);
+    Client.addTutorButtons();
+  } else if (pw == "Tutand") {
+    let modal2 = new bootstrap.Modal(document.getElementById("modal2"), {});
     modal2.show();
-  }
-  else {
+  } else {
     alert("Falscher Room-Key");
     Game.login();
   }
+};
 
-}
-
-Game.loginTutand = function() {
+Game.loginTutand = function () {
   var name = document.getElementById("email").value;
   var role;
-  if (document.getElementById("radio1").checked){
+  if (document.getElementById("radio1").checked) {
     role = 0;
-  }
-  else if (document.getElementById("radio2").checked){
+  } else if (document.getElementById("radio2").checked) {
     role = 1;
-  } 
-  else {
+  } else {
     role = 2;
   }
   console.log(name + "tutandworks: " + role);
-  Client.askNewPlayer(name,role); //Tutand Loggt sich eine
-
-}
+  Client.askNewPlayer(name, role); //Tutand Loggt sich eine
+};
