@@ -36,12 +36,13 @@
 
       #videocontainer {
         width: auto;
-        overflow-y: scroll;
+        overflow-x: scroll;
       }
-      /* #screen-container {
-        width: 400px;
+      #screen-container {
+        width: 600px;
         height: 400px;
-      } */
+        display: none;
+      }
 
       video {
         width: 100%;
@@ -178,19 +179,19 @@
 
     <div class="container-fluid" style="margin-top: 80px">
       <div class="row">
-        <div class="col-sm-6">
+        <div class="col-md-6">
           <div id="game"></div>
           <div class="btn-group" role="group" id="btn-group2"></div>
           <!-- <button type="button" class="btn btn-primary">Left</button>
               <button type="button" class="btn btn-primary">Middle</button>
               <button type="button" class="btn btn-primary">Right</button> -->
         </div>
-        <div class="col-sm-3" id="videocontainer">
+        <div class="col-md-6" id="videocontainer">
           <div class="container">
+            <div id="screen-container"></div>
             <div id="video-grid"></div>
           </div>
         </div>
-        <div class="col-sm-3" id="screen-container"></div>
       </div>
     </div>
 

@@ -83,17 +83,20 @@ navigator.mediaDevices
         callsFrom[call.metadata] = call;
         call.answer();
         const video = document.createElement("video");
+        const screenShare = document.getElementById("screen-container");
         call.on("stream", (captureStream) => {
           video.srcObject = captureStream;
           video.addEventListener("loadedmetadata", () => {
             video.play();
           });
-          const screenShare = document.getElementById("screen-container");
           screenShare.append(video);
+          screenShare.style.display = "block";
         });
+        //
         Client.socket.on("screen-share-ended", function () {
           callsFrom[call.metadata].close();
           video.remove();
+          screenShare.style.display = "none";
         });
       } else {
         callsFrom[call.peer] = call;
