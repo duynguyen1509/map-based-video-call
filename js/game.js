@@ -1,6 +1,5 @@
 var Game = {};
 Game.tutor = "";
-// Game.tutorIsOnStage = false;
 Game.isOnStage = {};
 Game.init = function () {
   //will make the game keep reacting to messages from the server even when the game window doesn’t have focus
@@ -90,13 +89,8 @@ Game.addNewPlayer = function (id, x, y, t, r, n) {
     fill: "#000",
   });
 
-  if (
-    Client.getCurrentUser() != id &&
-    // Game.tutor == id &&
-    Game.returnRoom(x, y) == 10
-  ) {
-    Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when tutor enter the stage then send the tutor our id
-    // Game.tutorIsOnStage = true;
+  if (Client.getCurrentUser() != id && Game.returnRoom(x, y) == 10) {
+    Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when someone enter the stage then send them our id
     Game.isOnStage[id] = true;
     // console.log("tutor on stage");
   }
@@ -130,25 +124,12 @@ Game.movePlayer = function (id, x, y) {
   tweenn.start();
 
   /**establish calls based on location */
-  // console.log("Game.returnRoom(x, y): ", Game.returnRoom(x, y));
-  // console.log("Client.getCurrentUser() != id: ", Client.getCurrentUser() != id);
-  // console.log("Game.tutor == id: ", Game.tutor == id);
-  // console.log(
-  //   "Game.roomChanged(Game.z[id], Game.returnRoom(x, y): ",
-  //   Game.roomChanged(Game.z[id], Game.returnRoom(x, y))
-  // );
   if (Game.roomChanged(Game.z[id], Game.returnRoom(x, y))) {
-    if (
-      Client.getCurrentUser() != id &&
-      // Game.tutor == id &&
-      Game.returnRoom(x, y) == 10
-    ) {
-      //check if tutor get on the stage
-      // Game.tutorIsOnStage = true;
+    if (Client.getCurrentUser() != id && Game.returnRoom(x, y) == 10) {
+      //check if other player get on the stage
       Game.isOnStage[id] = true;
-      // console.log("tutor on stage");
       console.log(`Game.isOnStage[${id}]: `, Game.isOnStage[id]);
-      Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when tutor enter the stage then send the tutor our id
+      Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when someone enter the stage then send them our id
     }
 
     if (Client.getCurrentUser() == id) {
@@ -160,7 +141,7 @@ Game.movePlayer = function (id, x, y) {
     }
     Game.z[id] = Game.returnRoom(x, y);
   }
-  /** */
+  /**establish calls based on location */
 };
 
 Game.removePlayer = function (id) {
@@ -249,5 +230,5 @@ Game.loginTutand = function () {
     role = 2;
   }
   console.log(name + "tutandworks: " + role);
-  Client.askNewPlayer(name, role); //Tutand Loggt sich eine
+  Client.askNewPlayer(name, role); //Tutand loggt sich ein
 };

@@ -35,8 +35,10 @@ server.listen(process.env.PORT || 8081, function () {
 
 server.chatOpened = true;
 server.stageOpened = false; //true: normal users can get on the stage; false: just the tutor can
+server.screenSharer = null;
 io.on("connection", function (socket) {
-  io.emit("initial-stage-status", server.stageOpened); //update current state of the stage for all new connected player
+  socket.emit("initial-stage-status", server.stageOpened); //update current state of the stage for all new connected player
+  socket.emit("initial-screen-sharer", server.screenSharer); //update current screen sharer for all new connected player
   console.log("socket id: ", socket.id);
   //socket used to establish the connection
   socket.on("newplayer", function (uid, name, rolle) {
@@ -72,9 +74,9 @@ io.on("connection", function (socket) {
     socket.on("kick", function (name) {
       var data = getAllPlayers();
       for (var i = 0; i < data.length; i++) {
-          if (data[i].n == name){
-            io.emit("remove", data[i].id);
-          }
+        if (data[i].n == name) {
+          io.emit("remove", data[i].id);
+        }
       }
     });
     // implemantation of handup
@@ -83,10 +85,10 @@ io.on("connection", function (socket) {
       io.emit("tint", socket.player);
     });
 
-    socket.on("chat", function() {
+    socket.on("chat", function () {
       server.chatOpened = !server.chatOpened;
       io.emit("chat", server.chatOpened);
-    })
+    });
   });
   socket.on("join-room", function (roomId, uid) {
     socket.join(roomId); //audio video and the game are separate rooms
@@ -102,18 +104,33 @@ io.on("connection", function (socket) {
       socket.broadcast.emit("user-left", roomId, uid);
     } else socket.to(roomId).emit("user-left", roomId, uid);
   });
-  socket.on("call-closed", function (u1, u2, callReceived) {
+  socket.on("call-closed", function (u1, u2, isCallReceived) {
     //u1: person who hanged up => inform u2 that u1 hanged up
-    io.to(u2).emit("call-closed", u1, callReceived);
+    io.to(u2).emit("call-closed", u1, isCallReceived);
   });
   socket.on("test", function () {
     console.log("test received");
   });
-  
-  socket.on('new message', function (name, message) {
+
+  socket.on("new message", function (name, message) {
     // Sende die Nachricht an alle Clients
-    socket.broadcast.emit('new message', name, message);
-    });
+    socket.broadcast.emit("new message", name, message);
+  });
+
+  socket.on("request-connected-users", function () {
+    socket.emit("send-connected-users", getAllPlayers());
+  });
+
+  socket.on("screen-shared", function (uid) {
+    server.screenSharer = uid;
+    socket.broadcast.emit("screen-shared", uid);
+  });
+  socket.on("send-id-to-sharer", function (sharer, receiver) {
+    socket.to(sharer).emit("send-id-to-sharer", receiver);
+  });
+  socket.on("screen-share-ended", function () {
+    socket.broadcast.emit("screen-share-ended");
+  });
 });
 
 function getAllPlayers() {

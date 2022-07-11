@@ -1,5 +1,5 @@
 {
-  "name": "map-to-school",
+  "name": "tutoria",
   "version": "1.0.0",
   "description": "Entwicklung einer umgebungsbewussten, kartenbasierten, mobilen Videocall- Anwendung zur Unterstützung des digitalen Lehrbetriebs",
   "main": "server.js",

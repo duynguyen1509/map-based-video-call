@@ -1,12 +1,10 @@
 var Client = {};
 Client.socket = io.connect();
-var stageStatus = {};
 let myPeer;
 Client.socket.on("connect", () => {
   myPeer = new Peer(Client.socket.id, {});
   myPeer.on("open", (uid) => {
     currentUser = uid;
-    // Client.socket.emit("join-room", ROOM_ID, uid);
   });
 });
 document.getElementById("myForm").style.display = "none"; // pop-up chat
@@ -16,21 +14,24 @@ const myVideo = document.createElement("video");
 const button_group = document.getElementById("btn-group");
 const button_group2 = document.getElementById("btn-group2");
 myVideo.muted = true;
-let myStream = null;
+let myStream, captureStream; //myStream: Video-,Audiostream ; captureStream: screen sharing stream
 let currentUser = null;
 // const peers = {};
 const callsTo = {};
 const callsFrom = {};
 let currentRoom = 0;
-// Game.stageOpenedForEveryone = stageOpenedForEveryone === "true";
+let screenSharer;
 
 Client.getCurrentUser = function () {
   return currentUser;
 };
-Client.socket.on("initial-stage-status", function (stageState) {
-  Game.stageOpenedForEveryone = stageState;
+Client.socket.on("initial-stage-status", function (stageStatus) {
+  console.log("stageStatus: ", stageStatus);
+  Game.stageOpenedForEveryone = stageStatus;
 });
-
+Client.socket.on("initial-screen-sharer", function (sharer) {
+  screenSharer = sharer;
+});
 navigator.mediaDevices
   .getUserMedia({
     video: true,
@@ -77,25 +78,43 @@ navigator.mediaDevices
 
     myPeer.on("call", (call) => {
       console.log("call received", call);
-      // peers[call.peer] = call;
-      callsFrom[call.peer] = call;
-      // console.log("peers: ", peers);
-      console.log("callsFrom: ", callsFrom);
-      //listen and answer to the call
-      const video = document.createElement("video");
-      if (Game.isOnStage[call.peer]) {
-        call.answer(); //answer the call from tutor w/o sending stream back
-      } else call.answer(stream); //answer the call by sending them our current stream
-      if (call.peer == Game.tutor) {
-        video.classList.add("tutor-video");
+      if (call.metadata) {
+        //show shared screen
+        callsFrom[call.metadata] = call;
+        call.answer();
+        const video = document.createElement("video");
+        call.on("stream", (captureStream) => {
+          video.srcObject = captureStream;
+          video.addEventListener("loadedmetadata", () => {
+            video.play();
+          });
+          const screenShare = document.getElementById("screen-container");
+          screenShare.append(video);
+        });
+        Client.socket.on("screen-share-ended", function () {
+          callsFrom[call.metadata].close();
+          video.remove();
+        });
+      } else {
+        callsFrom[call.peer] = call;
+        // console.log("peers: ", peers);
+        console.log("callsFrom: ", callsFrom);
+        //listen and answer to the call
+        const video = document.createElement("video");
+        if (Game.isOnStage[call.peer]) {
+          call.answer(); //answer the call from player(s) on stage w/o sending stream back
+        } else call.answer(stream); //answer the call by sending them our current stream
+        if (call.peer == Game.tutor) {
+          video.classList.add("tutor-video");
+        }
+        call.on("stream", (userVideoStream) => {
+          addVideoStream(video, userVideoStream);
+        }); // take in 'their' video streams
+        call.on("close", () => {
+          video.remove();
+          Client.socket.emit("call-closed", currentUser, call.peer, true); //currentUser:callee, call.peer:caller, isCallReceived:boolean
+        });
       }
-      call.on("stream", (userVideoStream) => {
-        addVideoStream(video, userVideoStream);
-      }); // take in 'their' video streams
-      call.on("close", () => {
-        video.remove();
-        Client.socket.emit("call-closed", currentUser, call.peer, true); //currentUser:callee, call.peer:caller, callReceived:boolean
-      });
     });
   });
 function addVideoStream(video, stream) {
@@ -151,7 +170,12 @@ Client.sendTest = function () {
 
 Client.askNewPlayer = function (n, r) {
   Client.socket.emit("newplayer", currentUser, n, r); //trigger new player event
-  console.log("newplayer: " + n + r);
+  console.log(`newplayer: ${currentUser}; role: ${r}; name: ${n}`);
+
+  //after log in success
+  console.log("sharer: ", screenSharer);
+  if (screenSharer != null)
+    Client.socket.emit("send-id-to-sharer", screenSharer, currentUser);
 };
 
 Client.sendClick = function (x, y) {
@@ -188,7 +212,6 @@ Client.socket.on("user-left", function (roomId, uid) {
     endCallFrom(uid);
     endCallTo(uid);
   }
-  // endCall(uid);
 });
 
 Client.socket.on("new message", function (name, message) {
@@ -319,9 +342,46 @@ Client.addTutorButtons = function () {
 
   var chat = document.createElement("button");
   chat.classList.add("btn", "btn-primary");
-  chat.innerHTML = "Chat";
+  chat.innerHTML = "Chat (de-)aktivieren";
   button_group2.appendChild(chat);
   chat.onclick = function () {
     Client.socket.emit("chat");
   };
+
+  var screenShare = document.createElement("button");
+  screenShare.classList.add("btn", "btn-primary");
+  screenShare.innerHTML = "Bildschirm teilen";
+  button_group2.appendChild(screenShare);
+  screenShare.onclick = function () {
+    shareScreen();
+  };
+};
+
+const shareScreen = async () => {
+  captureStream = await getLocalScreenCaptureStream();
+  console.log("screen shared");
+  Client.socket.emit("screen-shared", currentUser); //inform others that I shared my screen
+  // somebody clicked on "Stop sharing"
+  captureStream.getVideoTracks()[0].onended = function () {
+    Client.socket.emit("screen-share-ended");
+  };
+};
+Client.socket.on("screen-shared", function (sharer) {
+  Client.socket.emit("send-id-to-sharer", sharer, currentUser); //send my id to the sharer
+});
+Client.socket.on("send-id-to-sharer", function (reveicer) {
+  console.log("receiver: ", reveicer);
+  myPeer.call(reveicer, captureStream, { metadata: "screen-share" });
+});
+const getLocalScreenCaptureStream = async () => {
+  try {
+    const constraints = { video: { cursor: "always" }, audio: false };
+    const screenCaptureStream = await navigator.mediaDevices.getDisplayMedia(
+      constraints
+    );
+
+    return screenCaptureStream;
+  } catch (error) {
+    console.error("failed to get local screen", error);
+  }
 };
