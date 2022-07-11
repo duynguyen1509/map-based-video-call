@@ -1,6 +1,7 @@
 var Client = {};
 Client.socket = io.connect();
 var stageStatus = {};
+var mode = {};
 let myPeer;
 Client.socket.on("connect", () => {
   myPeer = new Peer(Client.socket.id, {});
@@ -105,6 +106,7 @@ function addVideoStream(video, stream) {
   });
   videoGrid.append(video);
 }
+
 function removePlayersFromStage() {
   //remove users form stage except for the tutor
   for (const uid in Game.z) {
@@ -151,6 +153,7 @@ Client.sendTest = function () {
 
 Client.askNewPlayer = function (n, r) {
   Client.socket.emit("newplayer", currentUser, n, r); //trigger new player event
+  Client.socket.emit("getmode");
   console.log("newplayer: " + n + r);
 };
 
@@ -272,6 +275,11 @@ Client.socket.on("allplayers", function (data) {
     Game.movePlayer(data.id, data.x, data.y);
   });
 
+  Client.socket.on("mode", function (m){
+    mode = m;
+    console.log(mode);
+  });
+
   Client.socket.on("tint", function (data) {
     console.log("tint " + data.t);
     Game.tintPlayer(data.id, data.t);
@@ -324,4 +332,29 @@ Client.addTutorButtons = function () {
   chat.onclick = function () {
     Client.socket.emit("chat");
   };
+
+  var mode = document.createElement("button");
+  mode.classList.add("btn", "btn-primary");
+  mode.innerHTML = "Modus wählen";
+  button_group2.appendChild(mode);
+  mode.onclick = function () {
+    let modal3 = new bootstrap.Modal(document.getElementById("modal3"), {});
+    modal3.show();
+  };  
+
 };
+
+Client.sendMode = function () {
+  if (document.getElementById("r1").checked) {
+    mode = 1;
+  } else if (document.getElementById("r2").checked) {
+    mode = 2;
+  } else {
+    mode = 3;
+  }
+  Client.socket.emit("setmode", mode);
+}
+
+Client.getMode = function () {
+  return mode;
+}

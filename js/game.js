@@ -172,22 +172,47 @@ Game.removePlayer = function (id) {
 };
 
 Game.returnRoom = function (x, y) {
-  //identifies room through x n' y
-  if (x >= 112 && x < 208 && y >= 32 && y < 80) {
-    return 10; //bühne
+  var mode = Client.getMode();
+  switch(mode){
+    case 1:
+      if (x >= 112 && x < 208 && y >= 32 && y < 80) {
+        console.log("Wiedergabe 10");
+        return 10; //bühne
+      }
+      if (x >= 272 && x < 304 && y >= 32 && y < 80) {
+        return 11; //fragebereich
+      }
+      else {
+        console.log("Wiedergabe 0");
+        return 0;
+        
+      }
+    case 2:
+          //identifies room through x n' y
+      if (x >= 112 && x < 208 && y >= 32 && y < 80) {
+        return 10; //bühne
+      }
+      if (x >= 272 && x < 304 && y >= 32 && y < 80) {
+        return 11; //fragebereich
+      }
+      if (x > 208 && x <= 320 && y >= 96 && y <= 144) {
+        console.log("Raum 1 betreten");
+        return 1;
+      } else if (x > 208 && x <= 320 && y > 144 && y <= 192) {
+        console.log("Raum 2 betreten");
+        return 2;
+      } else if (x > 208 && x <= 320 && y > 192 && y <= 240) {
+        console.log("Raum 3 betreten");
+        return 3;
+      } else {
+        return 0;
+      }
+    case 3:
+      return 1;
+    default:
+      return 1; 
   }
-  if (x >= 272 && x < 304 && y >= 32 && y < 80) {
-    return 11; //fragebereich
-  }
-  if (x > 208 && x <= 320 && y >= 96 && y <= 144) {
-    return 1;
-  } else if (x > 208 && x <= 320 && y > 144 && y <= 192) {
-    return 2;
-  } else if (x > 208 && x <= 320 && y > 192 && y <= 240) {
-    return 3;
-  } else {
-    return 0;
-  }
+  
 };
 
 Game.roomChanged = function (z1, z2) {

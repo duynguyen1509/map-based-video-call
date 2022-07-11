@@ -35,6 +35,8 @@ server.listen(process.env.PORT || 8081, function () {
 
 server.chatOpened = true;
 server.stageOpened = false; //true: normal users can get on the stage; false: just the tutor can
+server.mode = 1;
+
 io.on("connection", function (socket) {
   io.emit("initial-stage-status", server.stageOpened); //update current state of the stage for all new connected player
   console.log("socket id: ", socket.id);
@@ -57,6 +59,7 @@ io.on("connection", function (socket) {
       socket.player.y = data.y;
       io.emit("move", socket.player);
     });
+
     socket.on("move-player", function (uid, x, y) {
       socket.to(uid).emit("move-player", x, y);
     });
@@ -86,7 +89,21 @@ io.on("connection", function (socket) {
     socket.on("chat", function() {
       server.chatOpened = !server.chatOpened;
       io.emit("chat", server.chatOpened);
-    })
+    });
+
+    socket.on("setmode", function(m){
+      if (server.mode != m){
+        server.mode = m;
+        io.emit("mode", server.mode);
+        var data = getAllPlayers();
+      for (var i = 0; i < data.length; i++) {
+            socket.to(data[i].id).emit("move-player", data[i].x, data[i].y);
+      }}
+    });
+
+    socket.on("getmode", function(){
+      io.emit("mode", server.mode);
+    });
   });
   socket.on("join-room", function (roomId, uid) {
     socket.join(roomId); //audio video and the game are separate rooms
