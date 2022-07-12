@@ -34,11 +34,10 @@ server.listen(process.env.PORT || 8081, function () {
 });
 
 server.chatOpened = true;
-server.stageOpened = false; //true: normal users can get on the stage; false: just the tutor can
 server.mode = 1;
-
+server.stageIsOpen = false; //true: normal users can get on the stage; false: just the tutor can
+server.screenSharer = null;
 io.on("connection", function (socket) {
-  io.emit("initial-stage-status", server.stageOpened); //update current state of the stage for all new connected player
   console.log("socket id: ", socket.id);
   //socket used to establish the connection
   socket.on("newplayer", function (uid, name, rolle) {
@@ -63,10 +62,7 @@ io.on("connection", function (socket) {
     socket.on("move-player", function (uid, x, y) {
       socket.to(uid).emit("move-player", x, y);
     });
-    socket.on("stage-status-changed", function (stageOpenedForEveryone) {
-      server.stageOpened = stageOpenedForEveryone;
-      socket.broadcast.emit("stage-status-changed", stageOpenedForEveryone);
-    });
+
     socket.on("disconnect", function () {
       //io.emit(), which sends a message to all connected clients. We send the message 'remove', and send the id of the disconnected player to remove.
       io.emit("remove", socket.player.id);
@@ -75,9 +71,9 @@ io.on("connection", function (socket) {
     socket.on("kick", function (name) {
       var data = getAllPlayers();
       for (var i = 0; i < data.length; i++) {
-          if (data[i].n == name){
-            io.emit("remove", data[i].id);
-          }
+        if (data[i].n == name) {
+          io.emit("remove", data[i].id);
+        }
       }
     });
     // implemantation of handup
@@ -86,23 +82,52 @@ io.on("connection", function (socket) {
       io.emit("tint", socket.player);
     });
 
-    socket.on("chat", function() {
+    socket.on("chat", function () {
       server.chatOpened = !server.chatOpened;
       io.emit("chat", server.chatOpened);
     });
 
-    socket.on("setmode", function(m){
-      if (server.mode != m){
+    socket.on("new message", function (name, message) {
+      // Sende die Nachricht an alle Clients
+      socket.broadcast.emit("new message", name, message);
+    });
+
+    socket.on("setmode", function (m) {
+      if (server.mode != m) {
         server.mode = m;
         io.emit("mode", server.mode);
         var data = getAllPlayers();
-      for (var i = 0; i < data.length; i++) {
-            socket.to(data[i].id).emit("move-player", data[i].x, data[i].y);
-      }}
+        for (var i = 0; i < data.length; i++) {
+          socket.to(data[i].id).emit("move-player", data[i].x, data[i].y);
+        }
+      }
     });
 
-    socket.on("getmode", function(){
+    socket.on("getmode", function () {
       io.emit("mode", server.mode);
+    });
+
+    socket.on("get-screen-sharer", function () {
+      io.emit("screen-sharer", server.screenSharer); //update current screen sharer for players
+    });
+    socket.on("screen-shared", function (uid) {
+      server.screenSharer = uid;
+      io.emit("screen-sharer", server.screenSharer);
+    });
+    socket.on("send-id-to-sharer", function (sharer, receiver) {
+      socket.to(sharer).emit("send-id-to-sharer", receiver);
+    });
+    socket.on("screen-share-ended", function () {
+      server.screenSharer = null;
+      io.emit("screen-sharer", server.screenSharer);
+      socket.broadcast.emit("screen-share-ended");
+    });
+    socket.on("get-stage-status", function () {
+      io.emit("stage-status", server.stageIsOpen);
+    }); //update current state of the stage for all players
+    socket.on("set-stage-status", function (stageIsOpenForEveryone) {
+      server.stageIsOpen = stageIsOpenForEveryone;
+      io.emit("stage-status", server.stageIsOpen);
     });
   });
   socket.on("join-room", function (roomId, uid) {
@@ -119,18 +144,13 @@ io.on("connection", function (socket) {
       socket.broadcast.emit("user-left", roomId, uid);
     } else socket.to(roomId).emit("user-left", roomId, uid);
   });
-  socket.on("call-closed", function (u1, u2, callReceived) {
+  socket.on("call-closed", function (u1, u2, isCallReceived) {
     //u1: person who hanged up => inform u2 that u1 hanged up
-    io.to(u2).emit("call-closed", u1, callReceived);
+    io.to(u2).emit("call-closed", u1, isCallReceived);
   });
   socket.on("test", function () {
     console.log("test received");
   });
-  
-  socket.on('new message', function (name, message) {
-    // Sende die Nachricht an alle Clients
-    socket.broadcast.emit('new message', name, message);
-    });
 });
 
 function getAllPlayers() {

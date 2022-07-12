@@ -4,8 +4,12 @@
     <%- include('./partials/head'); %>
 
     <style>
-      body {font-family: 'VT323', monospace;}
-      * {box-sizing: border-box;}
+      body {
+        font-family: "VT323", monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
 
       #intro {
         background-image: url(/assets/map/example_map.png);
@@ -31,8 +35,13 @@
       }
 
       #videocontainer {
-        width:auto;
-        overflow-y: scroll;
+        width: auto;
+        overflow-x: scroll;
+      }
+      #screen-container {
+        width: 600px;
+        height: 400px;
+        display: none;
       }
 
       video {
@@ -42,14 +51,12 @@
         border-radius: 20px;
         padding: 10px;
       }
-      .tutor-video{
+      .tutor-video {
         border-style: solid;
         border-width: medium;
         padding: 0px;
         border-color: blue;
       }
-    
-      
 
       /* Button used to open the chat form - fixed at the bottom of the page */
       .open-button {
@@ -102,7 +109,7 @@
         resize: none;
         min-height: 20px;
         max-height: 400px;
-        overflow-y:scroll;
+        overflow-y: scroll;
       }
 
       /* When the textarea gets focus, do something */
@@ -113,13 +120,13 @@
 
       /* Set a style for the submit/send button */
       .form-container .btn {
-        background-color: #04AA6D;
+        background-color: #04aa6d;
         color: white;
         padding: 16px 20px;
         border: none;
         cursor: pointer;
         width: 100%;
-        margin-bottom:10px;
+        margin-bottom: 10px;
         opacity: 0.8;
       }
 
@@ -129,13 +136,13 @@
       }
 
       /* Add some hover effects to buttons */
-      .form-container .btn:hover, .open-button:hover {
+      .form-container .btn:hover,
+      .open-button:hover {
         opacity: 1;
       }
     </style>
-    
   </head>
-  
+
   <body>
     <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
       <div class="container-fluid">
@@ -169,39 +176,55 @@
       </header>
     </div> -->
     <!-- container mit den videos und dem "game" -->
-  
-      <div class="container-fluid" style="margin-top:80px">
-        <div class="row">
-          <div class="col-sm-6">
-            <div id="game"></div>
-            <div class="btn-group" role="group" id="btn-group2"></div>
-              <!-- <button type="button" class="btn btn-primary">Left</button>
+
+    <div class="container-fluid" style="margin-top: 80px">
+      <div class="row">
+        <div class="col-md-6">
+          <div id="game"></div>
+          <div class="btn-group" role="group" id="btn-group2"></div>
+          <!-- <button type="button" class="btn btn-primary">Left</button>
               <button type="button" class="btn btn-primary">Middle</button>
               <button type="button" class="btn btn-primary">Right</button> -->
-            </div>
-          <div class="col-sm-6" id="videocontainer">
-            <div class="container">
-              <div id="video-grid"></div>
-            </div>
-          </div>
+        </div>
+        <div class="col-md-6" id="videocontainer">
+          <div class="container">
+            <div id="screen-container"></div>
+            <div id="video-grid"></div>
           </div>
         </div>
+      </div>
+    </div>
 
-      
-    
+    <div class="container">
+      <!-- popup-Chat -->
+      <button id="chatbutton" class="open-button" onclick="openForm()">
+        Chat
+      </button>
+      <div class="chat-popup" id="myForm">
+        <div class="form-container">
+          <h1>Chat</h1>
+          <div class="m" id="messages"></div>
+          <textarea
+            id="inputMessage"
+            placeholder="Type message.."
+            name="msg"
+            required
+          ></textarea>
+          <button class="btn btn-success" onclick="sendMessage()">Send</button>
+          <button type="button" class="btn cancel" onclick="closeForm()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
 
-            <div class = "container"> 
-        <!-- popup-Chat -->
-            <button id="chatbutton" class="open-button" onclick="openForm()">Chat</button>
-            <div class="chat-popup" id="myForm">
-              <div class="form-container">
-                <h1>Chat</h1>
-                <div class = "m" id="messages"></div>
-                <textarea id="inputMessage" placeholder="Type message.." name="msg" required></textarea>
-                <button class="btn btn-success" onclick="sendMessage()">Send</button>
-                <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
-              </div>
-            </div>
+    <!-- The Modal -->
+    <div class="modal" id="myModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Login</h4>
           </div>
           
           <!-- The Modal -->

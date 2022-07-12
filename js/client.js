@@ -1,13 +1,11 @@
 var Client = {};
 Client.socket = io.connect();
-var stageStatus = {};
 var mode = {};
 let myPeer;
 Client.socket.on("connect", () => {
   myPeer = new Peer(Client.socket.id, {});
   myPeer.on("open", (uid) => {
     currentUser = uid;
-    // Client.socket.emit("join-room", ROOM_ID, uid);
   });
 });
 document.getElementById("myForm").style.display = "none"; // pop-up chat
@@ -17,20 +15,16 @@ const myVideo = document.createElement("video");
 const button_group = document.getElementById("btn-group");
 const button_group2 = document.getElementById("btn-group2");
 myVideo.muted = true;
-let myStream = null;
+let myStream, captureStream; //myStream: Video-,Audiostream ; captureStream: screen sharing stream
 let currentUser = null;
 // const peers = {};
 const callsTo = {};
 const callsFrom = {};
 let currentRoom = 0;
-// Game.stageOpenedForEveryone = stageOpenedForEveryone === "true";
 
 Client.getCurrentUser = function () {
   return currentUser;
 };
-Client.socket.on("initial-stage-status", function (stageState) {
-  Game.stageOpenedForEveryone = stageState;
-});
 
 navigator.mediaDevices
   .getUserMedia({
@@ -78,25 +72,46 @@ navigator.mediaDevices
 
     myPeer.on("call", (call) => {
       console.log("call received", call);
-      // peers[call.peer] = call;
-      callsFrom[call.peer] = call;
-      // console.log("peers: ", peers);
-      console.log("callsFrom: ", callsFrom);
-      //listen and answer to the call
-      const video = document.createElement("video");
-      if (Game.isOnStage[call.peer]) {
-        call.answer(); //answer the call from tutor w/o sending stream back
-      } else call.answer(stream); //answer the call by sending them our current stream
-      if (call.peer == Game.tutor) {
-        video.classList.add("tutor-video");
+      if (call.metadata) {
+        //show shared screen
+        callsFrom[call.metadata] = call;
+        call.answer();
+        const video = document.createElement("video");
+        const screenShare = document.getElementById("screen-container");
+        call.on("stream", (captureStream) => {
+          video.srcObject = captureStream;
+          video.addEventListener("loadedmetadata", () => {
+            video.play();
+          });
+          screenShare.append(video);
+          screenShare.style.display = "block";
+        });
+        //
+        Client.socket.on("screen-share-ended", function () {
+          callsFrom[call.metadata].close();
+          video.remove();
+          screenShare.style.display = "none";
+        });
+      } else {
+        callsFrom[call.peer] = call;
+        // console.log("peers: ", peers);
+        console.log("callsFrom: ", callsFrom);
+        //listen and answer to the call
+        const video = document.createElement("video");
+        if (Game.isOnStage[call.peer]) {
+          call.answer(); //answer the call from player(s) on stage w/o sending stream back
+        } else call.answer(stream); //answer the call by sending them our current stream
+        if (call.peer == Game.tutor) {
+          video.classList.add("tutor-video");
+        }
+        call.on("stream", (userVideoStream) => {
+          addVideoStream(video, userVideoStream);
+        }); // take in 'their' video streams
+        call.on("close", () => {
+          video.remove();
+          Client.socket.emit("call-closed", currentUser, call.peer, true); //currentUser:callee, call.peer:caller, isCallReceived:boolean
+        });
       }
-      call.on("stream", (userVideoStream) => {
-        addVideoStream(video, userVideoStream);
-      }); // take in 'their' video streams
-      call.on("close", () => {
-        video.remove();
-        Client.socket.emit("call-closed", currentUser, call.peer, true); //currentUser:callee, call.peer:caller, callReceived:boolean
-      });
     });
   });
 function addVideoStream(video, stream) {
@@ -143,18 +158,32 @@ function sendMessage() {
 Client.socket.on("move-player", function (x, y) {
   Client.socket.emit("click", { x: x, y: y });
 });
-Client.socket.on("stage-status-changed", function (stageOpenedForEveryone) {
-  Game.stageOpenedForEveryone = stageOpenedForEveryone;
+
+Client.socket.on("stage-status", function (stageStatus) {
+  console.log("stageStatus: ", stageStatus);
+  Game.stageOpenedForEveryone = stageStatus;
 });
+
+Client.socket.on("screen-sharer", function (sharer) {
+  console.log("sharer: ", sharer);
+  if (sharer != null) {
+    Client.socket.emit("send-id-to-sharer", sharer, currentUser);
+  }
+});
+
 Client.sendTest = function () {
   console.log("test sent");
   Client.socket.emit("test");
 };
 
 Client.askNewPlayer = function (n, r) {
+  //after log in success
   Client.socket.emit("newplayer", currentUser, n, r); //trigger new player event
-  Client.socket.emit("getmode");
   console.log("newplayer: " + n + r);
+  console.log(`newplayer: ${currentUser}; role: ${r}; name: ${n}`);
+  Client.socket.emit("getmode");
+  Client.socket.emit("get-stage-status");
+  Client.socket.emit("get-screen-sharer");
 };
 
 Client.sendClick = function (x, y) {
@@ -191,7 +220,6 @@ Client.socket.on("user-left", function (roomId, uid) {
     endCallFrom(uid);
     endCallTo(uid);
   }
-  // endCall(uid);
 });
 
 Client.socket.on("new message", function (name, message) {
@@ -275,7 +303,7 @@ Client.socket.on("allplayers", function (data) {
     Game.movePlayer(data.id, data.x, data.y);
   });
 
-  Client.socket.on("mode", function (m){
+  Client.socket.on("mode", function (m) {
     mode = m;
     console.log(mode);
   });
@@ -311,7 +339,7 @@ Client.addTutorButtons = function () {
     openOrLockStage.innerHTML = Game.stageOpenedForEveryone
       ? "Bühne sperren"
       : "Bühne freigeben";
-    Client.socket.emit("stage-status-changed", Game.stageOpenedForEveryone);
+    Client.socket.emit("set-stage-status", Game.stageOpenedForEveryone);
     console.log("Game.stageOpenedForEveryone: ", Game.stageOpenedForEveryone);
     removePlayersFromStage();
   };
@@ -327,7 +355,7 @@ Client.addTutorButtons = function () {
 
   var chat = document.createElement("button");
   chat.classList.add("btn", "btn-primary");
-  chat.innerHTML = "Chat";
+  chat.innerHTML = "Chat (de-)aktivieren";
   button_group2.appendChild(chat);
   chat.onclick = function () {
     Client.socket.emit("chat");
@@ -340,8 +368,42 @@ Client.addTutorButtons = function () {
   mode.onclick = function () {
     let modal3 = new bootstrap.Modal(document.getElementById("modal3"), {});
     modal3.show();
-  };  
+  };
 
+  var screenShare = document.createElement("button");
+  screenShare.classList.add("btn", "btn-primary");
+  screenShare.innerHTML = "Bildschirm teilen";
+  button_group2.appendChild(screenShare);
+  screenShare.onclick = function () {
+    shareScreen();
+  };
+};
+
+const shareScreen = async () => {
+  captureStream = await getLocalScreenCaptureStream();
+  console.log("screen shared");
+  Client.socket.emit("screen-shared", currentUser); //inform others that I shared my screen
+  // somebody clicked on "Stop sharing"
+  captureStream.getVideoTracks()[0].onended = function () {
+    Client.socket.emit("screen-share-ended");
+  };
+};
+
+Client.socket.on("send-id-to-sharer", function (reveicer) {
+  console.log("receiver: ", reveicer);
+  myPeer.call(reveicer, captureStream, { metadata: "screen-share" });
+});
+const getLocalScreenCaptureStream = async () => {
+  try {
+    const constraints = { video: { cursor: "always" }, audio: false };
+    const screenCaptureStream = await navigator.mediaDevices.getDisplayMedia(
+      constraints
+    );
+
+    return screenCaptureStream;
+  } catch (error) {
+    console.error("failed to get local screen", error);
+  }
 };
 
 Client.sendMode = function () {
@@ -353,8 +415,8 @@ Client.sendMode = function () {
     mode = 3;
   }
   Client.socket.emit("setmode", mode);
-}
+};
 
 Client.getMode = function () {
   return mode;
-}
+};
