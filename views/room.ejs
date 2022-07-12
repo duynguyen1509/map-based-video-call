@@ -7,12 +7,6 @@
       body {font-family: 'VT323', monospace;}
       * {box-sizing: border-box;}
 
-      #intro {
-        background-image: url(/assets/map/example_map.png);
-        background-size: cover;
-        height: 100vh;
-      }
-
       /* Height for devices larger than 576px */
       @media (min-width: 992px) {
         #intro {
@@ -30,10 +24,23 @@
         padding: 10px;
       }
 
+      #containersuper {
+        height: 100vh;
+      }
+
       #videocontainer {
-        width:auto;
+        width: 100%;
+        height: 100%;
+        overflow-x: scroll;
         overflow-y: scroll;
       }
+
+      #screen-container {
+        width: 600px;
+        height: 400px;
+        display: none;
+      }
+
 
       video {
         width: 100%;
@@ -174,6 +181,7 @@
   
       <div class="container-fluid" style="margin-top:80px">
         <div class="row">
+          
           <div class="col-md-6">
             <div id="game"></div>
             <div class="btn-group" role="group" id="btn-group2"></div>
@@ -181,11 +189,15 @@
               <button type="button" class="btn btn-primary">Middle</button>
               <button type="button" class="btn btn-primary">Right</button> -->
             </div>
-          <div class="col-md-6" id="videocontainer">
-            <div class="container">
+            
+          <div class="col-md-6" id="containersuper">
+            <div class="container" id="videocontainer">
+            
+              <div id="screen-container"></div>
               <div id="video-grid"></div>
             </div>
           </div>
+           
           </div>
         </div>
 

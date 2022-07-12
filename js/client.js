@@ -53,6 +53,9 @@ navigator.mediaDevices
     audio_button.classList.add("btn", "btn-primary");
     audio_button.innerHTML = "Audio anmachen "; //User is muted by default
     button_group.appendChild(audio_button);
+    var icon = document.createElement("span");
+    icon.className ="glyphicon glyphicon-remove-circle";
+    audio_button.appendChild(icon);
 
     audio_button.onclick = function () {
       myStream.getAudioTracks()[0].enabled =
