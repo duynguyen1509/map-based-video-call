@@ -89,7 +89,7 @@ io.on("connection", function (socket) {
       // Sende die Nachricht an alle Clients
       socket.broadcast.emit("new message", name, message);
     });
-    socket.on("getScreenSharer", function () {
+    socket.on("get-screen-sharer", function () {
       io.emit("screen-sharer", server.screenSharer); //update current screen sharer for players
     });
     socket.on("screen-shared", function (uid) {
@@ -104,7 +104,7 @@ io.on("connection", function (socket) {
       io.emit("screen-sharer", server.screenSharer);
       socket.broadcast.emit("screen-share-ended");
     });
-    socket.on("getStageStatus", function () {
+    socket.on("get-stage-status", function () {
       io.emit("stage-status", server.stageIsOpen);
     }); //update current state of the stage for all players
     socket.on("set-stage-status", function (stageIsOpenForEveryone) {

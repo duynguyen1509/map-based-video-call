@@ -179,8 +179,8 @@ Client.askNewPlayer = function (n, r) {
   console.log(`newplayer: ${currentUser}; role: ${r}; name: ${n}`);
 
   //after log in success
-  Client.socket.emit("getStageStatus");
-  Client.socket.emit("getScreenSharer");
+  Client.socket.emit("get-stage-status");
+  Client.socket.emit("get-screen-sharer");
 };
 
 Client.sendClick = function (x, y) {
