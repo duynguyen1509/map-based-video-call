@@ -34,11 +34,9 @@ server.listen(process.env.PORT || 8081, function () {
 });
 
 server.chatOpened = true;
-server.stageOpened = false; //true: normal users can get on the stage; false: just the tutor can
+server.stageIsOpen = false; //true: normal users can get on the stage; false: just the tutor can
 server.screenSharer = null;
 io.on("connection", function (socket) {
-  socket.emit("initial-stage-status", server.stageOpened); //update current state of the stage for all new connected player
-  socket.emit("initial-screen-sharer", server.screenSharer); //update current screen sharer for all new connected player
   console.log("socket id: ", socket.id);
   //socket used to establish the connection
   socket.on("newplayer", function (uid, name, rolle) {
@@ -62,10 +60,7 @@ io.on("connection", function (socket) {
     socket.on("move-player", function (uid, x, y) {
       socket.to(uid).emit("move-player", x, y);
     });
-    socket.on("stage-status-changed", function (stageOpenedForEveryone) {
-      server.stageOpened = stageOpenedForEveryone;
-      socket.broadcast.emit("stage-status-changed", stageOpenedForEveryone);
-    });
+
     socket.on("disconnect", function () {
       //io.emit(), which sends a message to all connected clients. We send the message 'remove', and send the id of the disconnected player to remove.
       io.emit("remove", socket.player.id);
@@ -89,6 +84,33 @@ io.on("connection", function (socket) {
       server.chatOpened = !server.chatOpened;
       io.emit("chat", server.chatOpened);
     });
+
+    socket.on("new message", function (name, message) {
+      // Sende die Nachricht an alle Clients
+      socket.broadcast.emit("new message", name, message);
+    });
+    socket.on("getScreenSharer", function () {
+      io.emit("screen-sharer", server.screenSharer); //update current screen sharer for players
+    });
+    socket.on("screen-shared", function (uid) {
+      server.screenSharer = uid;
+      io.emit("screen-sharer", server.screenSharer);
+    });
+    socket.on("send-id-to-sharer", function (sharer, receiver) {
+      socket.to(sharer).emit("send-id-to-sharer", receiver);
+    });
+    socket.on("screen-share-ended", function () {
+      server.screenSharer = null;
+      io.emit("screen-sharer", server.screenSharer);
+      socket.broadcast.emit("screen-share-ended");
+    });
+    socket.on("getStageStatus", function () {
+      io.emit("stage-status", server.stageIsOpen);
+    }); //update current state of the stage for all players
+    socket.on("set-stage-status", function (stageIsOpenForEveryone) {
+      server.stageIsOpen = stageIsOpenForEveryone;
+      io.emit("stage-status", server.stageIsOpen);
+    });
   });
   socket.on("join-room", function (roomId, uid) {
     socket.join(roomId); //audio video and the game are separate rooms
@@ -110,26 +132,6 @@ io.on("connection", function (socket) {
   });
   socket.on("test", function () {
     console.log("test received");
-  });
-
-  socket.on("new message", function (name, message) {
-    // Sende die Nachricht an alle Clients
-    socket.broadcast.emit("new message", name, message);
-  });
-
-  socket.on("request-connected-users", function () {
-    socket.emit("send-connected-users", getAllPlayers());
-  });
-
-  socket.on("screen-shared", function (uid) {
-    server.screenSharer = uid;
-    socket.broadcast.emit("screen-shared", uid);
-  });
-  socket.on("send-id-to-sharer", function (sharer, receiver) {
-    socket.to(sharer).emit("send-id-to-sharer", receiver);
-  });
-  socket.on("screen-share-ended", function () {
-    socket.broadcast.emit("screen-share-ended");
   });
 });
 

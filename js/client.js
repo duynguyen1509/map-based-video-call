@@ -20,18 +20,11 @@ let currentUser = null;
 const callsTo = {};
 const callsFrom = {};
 let currentRoom = 0;
-let screenSharer;
 
 Client.getCurrentUser = function () {
   return currentUser;
 };
-Client.socket.on("initial-stage-status", function (stageStatus) {
-  console.log("stageStatus: ", stageStatus);
-  Game.stageOpenedForEveryone = stageStatus;
-});
-Client.socket.on("initial-screen-sharer", function (sharer) {
-  screenSharer = sharer;
-});
+
 navigator.mediaDevices
   .getUserMedia({
     video: true,
@@ -163,9 +156,19 @@ function sendMessage() {
 Client.socket.on("move-player", function (x, y) {
   Client.socket.emit("click", { x: x, y: y });
 });
-Client.socket.on("stage-status-changed", function (stageOpenedForEveryone) {
-  Game.stageOpenedForEveryone = stageOpenedForEveryone;
+
+Client.socket.on("stage-status", function (stageStatus) {
+  console.log("stageStatus: ", stageStatus);
+  Game.stageOpenedForEveryone = stageStatus;
 });
+
+Client.socket.on("screen-sharer", function (sharer) {
+  console.log("sharer: ", sharer);
+  if (sharer != null) {
+    Client.socket.emit("send-id-to-sharer", sharer, currentUser);
+  }
+});
+
 Client.sendTest = function () {
   console.log("test sent");
   Client.socket.emit("test");
@@ -176,9 +179,8 @@ Client.askNewPlayer = function (n, r) {
   console.log(`newplayer: ${currentUser}; role: ${r}; name: ${n}`);
 
   //after log in success
-  console.log("sharer: ", screenSharer);
-  if (screenSharer != null)
-    Client.socket.emit("send-id-to-sharer", screenSharer, currentUser);
+  Client.socket.emit("getStageStatus");
+  Client.socket.emit("getScreenSharer");
 };
 
 Client.sendClick = function (x, y) {
@@ -329,7 +331,7 @@ Client.addTutorButtons = function () {
     openOrLockStage.innerHTML = Game.stageOpenedForEveryone
       ? "Bühne sperren"
       : "Bühne freigeben";
-    Client.socket.emit("stage-status-changed", Game.stageOpenedForEveryone);
+    Client.socket.emit("set-stage-status", Game.stageOpenedForEveryone);
     console.log("Game.stageOpenedForEveryone: ", Game.stageOpenedForEveryone);
     removePlayersFromStage();
   };
@@ -369,9 +371,7 @@ const shareScreen = async () => {
     Client.socket.emit("screen-share-ended");
   };
 };
-Client.socket.on("screen-shared", function (sharer) {
-  Client.socket.emit("send-id-to-sharer", sharer, currentUser); //send my id to the sharer
-});
+
 Client.socket.on("send-id-to-sharer", function (reveicer) {
   console.log("receiver: ", reveicer);
   myPeer.call(reveicer, captureStream, { metadata: "screen-share" });
