@@ -34,7 +34,7 @@ server.listen(process.env.PORT || 8081, function () {
 });
 
 server.chatOpened = true;
-server.mode = 1;
+server.mode = 3;
 server.stageIsOpen = false; //true: normal users can get on the stage; false: just the tutor can
 server.screenSharer = null;
 io.on("connection", function (socket) {

@@ -189,7 +189,7 @@ Game.returnRoom = function (x, y) {
         return 0;
       }
     case 3:
-      return 1;
+      return 4;
     default:
       return 1; 
   }

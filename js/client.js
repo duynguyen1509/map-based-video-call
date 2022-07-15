@@ -185,6 +185,9 @@ Client.askNewPlayer = function (n, r) {
   console.log("newplayer: " + n + r);
   console.log(`newplayer: ${currentUser}; role: ${r}; name: ${n}`);
   Client.socket.emit("getmode");
+  if (mode == 3){
+    Client.socket.emit("join-room", 4, uid);
+  }
   Client.socket.emit("get-stage-status");
   Client.socket.emit("get-screen-sharer");
 };
