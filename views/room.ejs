@@ -4,14 +4,17 @@
     <%- include('./partials/head'); %>
 
     <style>
-      body {font-family: 'VT323', monospace;}
-      * {box-sizing: border-box;}
+      body {
+        font-family: "VT323", monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
 
       #intro {
-        background-image: url(/assets/map/example_map.png) ;
+        background-image: url(/assets/map/example_map.png);
         background-repeat: no-repeat;
         background-size: cover;
-
       }
 
       /* Height for devices larger than 576px */
@@ -43,11 +46,10 @@
       }
 
       #screen-container {
-        width: 600px;
-        height: 400px;
+        width: 100%;
+        height: auto;
         display: none;
       }
-
 
       video {
         width: 100%;
@@ -56,14 +58,12 @@
         border-radius: 20px;
         padding: 10px;
       }
-      .tutor-video{
+      .tutor-video {
         border-style: solid;
         border-width: medium;
         padding: 0px;
         border-color: blue;
       }
-    
-      
 
       /* Button used to open the chat form - fixed at the bottom of the page */
       .open-button {
@@ -116,7 +116,7 @@
         resize: none;
         min-height: 20px;
         max-height: 400px;
-        overflow-y:scroll;
+        overflow-y: scroll;
       }
 
       /* When the textarea gets focus, do something */
@@ -127,13 +127,13 @@
 
       /* Set a style for the submit/send button */
       .form-container .btn {
-        background-color: #04AA6D;
+        background-color: #04aa6d;
         color: white;
         padding: 16px 20px;
         border: none;
         cursor: pointer;
         width: 100%;
-        margin-bottom:10px;
+        margin-bottom: 10px;
         opacity: 0.8;
       }
 
@@ -143,17 +143,19 @@
       }
 
       /* Add some hover effects to buttons */
-      .form-container .btn:hover, .open-button:hover {
+      .form-container .btn:hover,
+      .open-button:hover {
         opacity: 1;
       }
     </style>
-    
   </head>
-  
+
   <body>
     <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#"><img src="/assets/Logo.png" height="48px" alt=""></a>
+        <a class="navbar-brand" href="#"
+          ><img src="/assets/Logo.png" height="48px" alt=""
+        /></a>
       </div>
       <div class="float-end">
         <div class="btn-group" role="group" id="btn-group"></div>
@@ -183,157 +185,224 @@
       </header>
     </div> -->
 
-
     <!-- container mit den videos und dem "game" -->
-    <div id="intro" class="bg-image shadow-2-strong" style="margin-top:75px">
+    <div id="intro" class="bg-image shadow-2-strong" style="margin-top: 75px">
       <div class="container-fluid">
         <div class="row">
-          
           <div class="col-md-6">
             <div id="game" class="align-self-center"></div>
-            <div class="btn-group align-self-center" role="group" id="btn-group2"></div>
-              <!-- <button type="button" class="btn btn-primary">Left</button>
+            <div
+              class="btn-group align-self-center"
+              role="group"
+              id="btn-group2"
+            ></div>
+            <!-- <button type="button" class="btn btn-primary">Left</button>
               <button type="button" class="btn btn-primary">Middle</button>
               <button type="button" class="btn btn-primary">Right</button> -->
-            </div>
-            
+          </div>
+
           <div class="col-md-6" id="containersuper">
             <div class="container" id="videocontainer">
-            
               <div id="screen-container"></div>
               <div id="video-grid"></div>
             </div>
           </div>
-           
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- popup-Chat -->
+      <button id="chatbutton" class="open-button" onclick="openForm()">
+        Chat
+      </button>
+      <div class="chat-popup" id="myForm">
+        <div class="form-container">
+          <h1>Chat</h1>
+          <div class="m" id="messages"></div>
+          <textarea
+            id="inputMessage"
+            placeholder="Type message.."
+            name="msg"
+            required
+          ></textarea>
+          <button class="btn btn-success" onclick="sendMessage()">Send</button>
+          <button type="button" class="btn cancel" onclick="closeForm()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal login -->
+    <div class="modal" id="myModal" data-bs-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Login</h4>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <div class="container">
+              <div class="mb-3 mt-3">
+                <label for="email">Name:</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  placeholder="Namen eingeben"
+                  name="email"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="pwd">Password:</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="pwd"
+                  placeholder="Passwort eingeben"
+                  name="pswd"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-danger"
+              data-bs-dismiss="modal"
+              onclick="Game.loginRole()"
+            >
+              Login
+            </button>
           </div>
         </div>
       </div>
-      
-    
+    </div>
 
-            <div class = "container"> 
-        <!-- popup-Chat -->
-            <button id="chatbutton" class="open-button" onclick="openForm()">Chat</button>
-            <div class="chat-popup" id="myForm">
-              <div class="form-container">
-                <h1>Chat</h1>
-                <div class = "m" id="messages"></div>
-                <textarea id="inputMessage" placeholder="Type message.." name="msg" required></textarea>
-                <button class="btn btn-success" onclick="sendMessage()">Send</button>
-                <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Modal login -->
-          <div class="modal" id="myModal" data-bs-backdrop="static">
-            <div class="modal-dialog">
-              <div class="modal-content">
-          
-                <!-- Modal Header -->
-                <div class="modal-header">
-                  <h4 class="modal-title">Login</h4>
-                </div>
-          
-                <!-- Modal body -->
-                <div class="modal-body">
-                  <div class = "container">
-                    <div class="mb-3 mt-3">
-                      <label for="email">Name:</label>
-                      <input type="email" class="form-control" id="email" placeholder="Namen eingeben" name="email">
-                    </div>
-                    <div class="mb-3">
-                      <label for="pwd">Password:</label>
-                      <input type="password" class="form-control" id="pwd" placeholder="Passwort eingeben" name="pswd">
-                    </div>
-                  </div>
-                </div>
-          
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="Game.loginRole()">Login</button>
-                </div> 
-          
-              </div>
-            </div>
+    <!-- Modal Roles -->
+    <div class="modal" id="modal2" data-bs-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Login</h4>
           </div>
 
-          <!-- Modal Roles -->
-          <div class="modal" id="modal2" data-bs-backdrop="static">
-            <div class="modal-dialog">
-              <div class="modal-content">
-          
-                <!-- Modal Header -->
-                <div class="modal-header">
-                  <h4 class="modal-title">Login</h4>
-                </div>
-          
-                <!-- Modal body -->
-                <div class="modal-body">
-                  <div class = "container">
-                    <div class="form-check">
-                      <input type="radio" class="form-check-input" id="radio1" name="optradio" value="option1" checked>f
-                      <label class="form-check-label" for="radio1"></label>
-                    </div>
-                    <div class="form-check">
-                      <input type="radio" class="form-check-input" id="radio2" name="optradio" value="option2">m
-                      <label class="form-check-label" for="radio2"></label>
-                    </div>
-                    <div class="form-check">
-                      <input type="radio" class="form-check-input" id="radio3" name="optradio" value="option3">d
-                      <label class="form-check-label" for="radio3"></label>
-                    </div>
-                  </div>
-                </div>
-          
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="Game.loginTutand()">Login</button>
-                </div>
-              
-          
+          <!-- Modal body -->
+          <div class="modal-body">
+            <div class="container">
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="radio1"
+                  name="optradio"
+                  value="option1"
+                  checked
+                />f
+                <label class="form-check-label" for="radio1"></label>
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="radio2"
+                  name="optradio"
+                  value="option2"
+                />m
+                <label class="form-check-label" for="radio2"></label>
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="radio3"
+                  name="optradio"
+                  value="option3"
+                />d
+                <label class="form-check-label" for="radio3"></label>
               </div>
             </div>
           </div>
 
-          <!-- The Modal -->
-          <div class="modal" id="modal3" data-bs-backdrop="static">
-            <div class="modal-dialog">
-              <div class="modal-content">
-          
-                <!-- Modal Header -->
-                <div class="modal-header">
-                  <h4 class="modal-title">Modus wählen</h4>
-                </div>
-          
-                <!-- Modal body -->
-                <div class="modal-body">
-                  <div class = "container">
-                    <div class="form-check">
-                      <input type="radio" class="form-check-input" id="r1" name="optradio" value="option1" checked>Nur Tutor sichtbar
-                      <label class="form-check-label" for="radio1"></label>
-                    </div>
-                    <div class="form-check">
-                      <input type="radio" class="form-check-input" id="r2" name="optradio" value="option2">Tischgruppen
-                      <label class="form-check-label" for="radio2"></label>
-                    </div>
-                    <div class="form-check">
-                      <input type="radio" class="form-check-input" id="r3" name="optradio" value="option3">Alle sehen alle
-                      <label class="form-check-label" for="radio3"></label>
-                    </div>
-                  </div>
-                </div>
-          
-                <div class="modal-footer">
-                  <button type="button" class="btn" data-bs-dismiss="modal" onclick="Client.sendMode()">Auswählen</button>
-                </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-danger"
+              data-bs-dismiss="modal"
+              onclick="Game.loginTutand()"
+            >
+              Login
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- The Modal -->
+    <div class="modal" id="modal3" data-bs-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Modus wählen</h4>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <div class="container">
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="r1"
+                  name="optradio"
+                  value="option1"
+                />Nur Tutor sichtbar
+                <label class="form-check-label" for="radio1"></label>
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="r2"
+                  name="optradio"
+                  value="option2"
+                />Tischgruppen
+                <label class="form-check-label" for="radio2"></label>
+              </div>
+              <div class="form-check">
+                <input
+                  type="radio"
+                  class="form-check-input"
+                  id="r3"
+                  name="optradio"
+                  value="option3"
+                  checked
+                />Alle sehen alle
+                <label class="form-check-label" for="radio3"></label>
               </div>
             </div>
           </div>
-    
-  
-    
 
-    </body>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn"
+              data-bs-dismiss="modal"
+              onclick="Client.sendMode()"
+            >
+              Auswählen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/game.js" type="text/javascript"></script>
   <script src="js/main.js" type="text/javascript"></script>

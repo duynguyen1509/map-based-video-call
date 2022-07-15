@@ -14,6 +14,7 @@ const videoGrid = document.getElementById("video-grid");
 const myVideo = document.createElement("video");
 const button_group = document.getElementById("btn-group");
 const button_group2 = document.getElementById("btn-group2");
+
 myVideo.muted = true;
 let myStream, captureStream; //myStream: Video-,Audiostream ; captureStream: screen sharing stream
 let currentUser = null;
@@ -38,36 +39,45 @@ navigator.mediaDevices
     /**Audio und Video an unnd ausmachen */
     var video_button = document.createElement("button");
     video_button.classList.add("btn", "btn-primary");
-    video_button.innerHTML = "Kamera ausmachen";
+    var videoIcon = document.createElement("span");
+    videoIcon.className = myStream.getVideoTracks()[0].enabled
+      ? "bi-camera-video"
+      : "bi-camera-video-off";
+    video_button.appendChild(videoIcon);
     button_group.appendChild(video_button);
 
     video_button.onclick = function () {
       myStream.getVideoTracks()[0].enabled =
         !myStream.getVideoTracks()[0].enabled;
-      video_button.innerHTML = myStream.getVideoTracks()[0].enabled
-        ? "Kamera ausmachen"
-        : "Kamera anmachen";
+      videoIcon = video_button.firstChild;
+      videoIcon.className = myStream.getVideoTracks()[0].enabled
+        ? "bi-camera-video"
+        : "bi-camera-video-off";
     };
 
     var audio_button = document.createElement("button");
     audio_button.classList.add("btn", "btn-primary");
-    audio_button.innerHTML = "Audio anmachen "; //User is muted by default
+    var audioIcon = document.createElement("span");
+    audioIcon.className = myStream.getAudioTracks()[0].enabled
+      ? "bi-mic"
+      : "bi-mic-mute";
+    audio_button.appendChild(audioIcon);
     button_group.appendChild(audio_button);
-    var icon = document.createElement("span");
-    icon.className ="glyphicon glyphicon-remove-circle";
-    audio_button.appendChild(icon);
 
     audio_button.onclick = function () {
       myStream.getAudioTracks()[0].enabled =
         !myStream.getAudioTracks()[0].enabled;
-      audio_button.innerHTML = myStream.getAudioTracks()[0].enabled
-        ? "Audio ausmachen"
-        : "Audio anmachen";
+      audioIcon = audio_button.firstChild;
+      audioIcon.className = myStream.getAudioTracks()[0].enabled
+        ? "bi-mic"
+        : "bi-mic-mute";
     };
 
     var handup = document.createElement("button");
     handup.classList.add("btn", "btn-primary");
-    handup.innerHTML = "Melden";
+    var handUpIcon = document.createElement("span");
+    handUpIcon.className = "bi-hand-index";
+    handup.appendChild(handUpIcon);
     button_group.appendChild(handup);
     handup.onclick = function () {
       Client.setTint();
@@ -86,13 +96,31 @@ navigator.mediaDevices
           video.addEventListener("loadedmetadata", () => {
             video.play();
           });
-          screenShare.append(video);
+
+          const fullscreenButton = document.createElement("button");
+          fullscreenButton.classList.add("btn", "btn-primary");
+          var fullscreenIcon = document.createElement("span");
+          fullscreenIcon.className = "bi-arrows-fullscreen";
+          fullscreenButton.appendChild(fullscreenIcon);
+          fullscreenButton.onclick = function () {
+            if (video.requestFullscreen) {
+              video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+              /* Safari */
+              video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+              /* IE11 */
+              video.msRequestFullscreen();
+            }
+          };
+          screenShare.append(video, fullscreenButton);
           screenShare.style.display = "block";
         });
         //
         Client.socket.on("screen-share-ended", function () {
           callsFrom[call.metadata].close();
           video.remove();
+          screenShare.removeChild(screenShare.lastChild);
           screenShare.style.display = "none";
         });
       } else {
@@ -185,7 +213,7 @@ Client.askNewPlayer = function (n, r) {
   console.log("newplayer: " + n + r);
   console.log(`newplayer: ${currentUser}; role: ${r}; name: ${n}`);
   Client.socket.emit("getmode");
-  if (mode == 3){
+  if (mode == 3) {
     Client.socket.emit("join-room", 4, uid);
   }
   Client.socket.emit("get-stage-status");
