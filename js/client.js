@@ -1,6 +1,6 @@
 var Client = {};
 Client.socket = io.connect();
-var mode = {};
+let mode;
 let myPeer;
 Client.socket.on("connect", () => {
   myPeer = new Peer(Client.socket.id, {});
@@ -212,12 +212,53 @@ Client.askNewPlayer = function (n, r) {
   Client.socket.emit("newplayer", currentUser, n, r); //trigger new player event
   console.log("newplayer: " + n + r);
   console.log(`newplayer: ${currentUser}; role: ${r}; name: ${n}`);
-  Client.socket.emit("getmode");
-  if (mode == 3) {
-    Client.socket.emit("join-room", 4, uid);
-  }
+  Client.socket.emit("get-mode");
   Client.socket.emit("get-stage-status");
   Client.socket.emit("get-screen-sharer");
+  Client.socket.on("allplayers", function (data) {
+    console.log("all players: ", data);
+    for (var i = 0; i < data.length; i++) {
+      Game.addNewPlayer(
+        data[i].id,
+        data[i].x,
+        data[i].y,
+        data[i].t,
+        data[i].r,
+        data[i].n
+      );
+    }
+
+    Client.socket.on("move", function (data) {
+      Game.movePlayer(data.id, data.x, data.y);
+    });
+
+    Client.socket.on("mode", function (m) {
+      mode = m;
+      console.log("mode: ", m);
+    });
+
+    Client.socket.on("tint", function (data) {
+      console.log("tint " + data.t);
+      Game.tintPlayer(data.id, data.t);
+    });
+
+    Client.socket.on("remove", function (id) {
+      console.log("user: " + id + " disconnected!");
+      Game.removePlayer(id);
+      // endCall(id);
+      endCallFrom(id);
+      endCallTo(id);
+      if (id == currentUser) {
+        alert("Du wurdest aus dem Tutorium entfernt");
+        document.getElementById("myForm").style.display = "none";
+        document.getElementById("chatbutton").style.display = "none";
+      }
+    });
+  });
+  Client.socket.on("newplayer", function (data) {
+    console.log("New User Connected: " + data.id);
+    Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r, data.n);
+  });
 };
 
 Client.sendClick = function (x, y) {
@@ -228,10 +269,6 @@ Client.setTint = function () {
   Client.socket.emit("tint");
 };
 
-Client.socket.on("newplayer", function (data) {
-  console.log("New User Connected: " + data.id);
-  Game.addNewPlayer(data.id, data.x, data.y, data.t, data.r, data.n);
-});
 Client.socket.on("join-room", function (player) {
   console.log("User " + player.id + " joined room");
   setTimeout(() => {
@@ -319,46 +356,6 @@ Client.socket.on("call-closed", function (uid, callReceived) {
   // endCall(uid);
   if (callReceived) endCallTo(uid);
   else endCallFrom(uid);
-});
-Client.socket.on("allplayers", function (data) {
-  console.log("all players: ", data);
-  for (var i = 0; i < data.length; i++) {
-    Game.addNewPlayer(
-      data[i].id,
-      data[i].x,
-      data[i].y,
-      data[i].t,
-      data[i].r,
-      data[i].n
-    );
-  }
-
-  Client.socket.on("move", function (data) {
-    Game.movePlayer(data.id, data.x, data.y);
-  });
-
-  Client.socket.on("mode", function (m) {
-    mode = m;
-    console.log(mode);
-  });
-
-  Client.socket.on("tint", function (data) {
-    console.log("tint " + data.t);
-    Game.tintPlayer(data.id, data.t);
-  });
-
-  Client.socket.on("remove", function (id) {
-    console.log("user: " + id + " disconnected!");
-    Game.removePlayer(id);
-    // endCall(id);
-    endCallFrom(id);
-    endCallTo(id);
-    if (id == currentUser) {
-      alert("Du wurdest aus dem Tutorium entfernt");
-      document.getElementById("myForm").style.display = "none";
-      document.getElementById("chatbutton").style.display = "none";
-    }
-  });
 });
 
 Client.addTutorButtons = function () {
@@ -452,5 +449,13 @@ Client.sendMode = function () {
 };
 
 Client.getMode = function () {
-  return mode;
+  //wait until mode is defined
+  return new Promise((res, rej) => {
+    var interval = setInterval(function () {
+      if (typeof mode == "undefined") return;
+      clearInterval(interval);
+      // console.log("mode: ", mode);
+      res(mode);
+    }, 10);
+  });
 };

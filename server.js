@@ -62,7 +62,24 @@ io.on("connection", function (socket) {
     socket.on("move-player", function (uid, x, y) {
       socket.to(uid).emit("move-player", x, y);
     });
-
+    socket.on("join-room", function (roomId, uid) {
+      socket.join(roomId); //audio video and the game are separate rooms
+      socket.to(roomId).broadcast.emit("join-room", socket.player); //broadcast new player info to all other players
+    });
+    socket.on("tutor-on-stage", function (tutor, tutand) {
+      socket.to(tutor).emit("call-tutand", tutand);
+    });
+    socket.on("leave-room", function (roomId, uid) {
+      //leave room
+      socket.leave(roomId);
+      if (roomId == 10) {
+        socket.broadcast.emit("user-left", roomId, uid);
+      } else socket.to(roomId).emit("user-left", roomId, uid);
+    });
+    socket.on("call-closed", function (u1, u2, isCallReceived) {
+      //u1: person who hanged up => inform u2 that u1 hanged up
+      io.to(u2).emit("call-closed", u1, isCallReceived);
+    });
     socket.on("disconnect", function () {
       //io.emit(), which sends a message to all connected clients. We send the message 'remove', and send the id of the disconnected player to remove.
       io.emit("remove", socket.player.id);
@@ -103,12 +120,12 @@ io.on("connection", function (socket) {
       }
     });
 
-    socket.on("getmode", function () {
-      io.emit("mode", server.mode);
+    socket.on("get-mode", function () {
+      socket.emit("mode", server.mode);
     });
 
     socket.on("get-screen-sharer", function () {
-      io.emit("screen-sharer", server.screenSharer); //update current screen sharer for players
+      socket.emit("screen-sharer", server.screenSharer); //update current screen sharer for players
     });
     socket.on("screen-shared", function (uid) {
       server.screenSharer = uid;
@@ -123,31 +140,14 @@ io.on("connection", function (socket) {
       socket.broadcast.emit("screen-share-ended");
     });
     socket.on("get-stage-status", function () {
-      io.emit("stage-status", server.stageIsOpen);
+      socket.emit("stage-status", server.stageIsOpen);
     }); //update current state of the stage for all players
     socket.on("set-stage-status", function (stageIsOpenForEveryone) {
       server.stageIsOpen = stageIsOpenForEveryone;
       io.emit("stage-status", server.stageIsOpen);
     });
   });
-  socket.on("join-room", function (roomId, uid) {
-    socket.join(roomId); //audio video and the game are separate rooms
-    socket.to(roomId).broadcast.emit("join-room", socket.player); //broadcast new player info to all other players
-  });
-  socket.on("tutor-on-stage", function (tutor, tutand) {
-    socket.to(tutor).emit("call-tutand", tutand);
-  });
-  socket.on("leave-room", function (roomId, uid) {
-    //leave room
-    socket.leave(roomId);
-    if (roomId == 10) {
-      socket.broadcast.emit("user-left", roomId, uid);
-    } else socket.to(roomId).emit("user-left", roomId, uid);
-  });
-  socket.on("call-closed", function (u1, u2, isCallReceived) {
-    //u1: person who hanged up => inform u2 that u1 hanged up
-    io.to(u2).emit("call-closed", u1, isCallReceived);
-  });
+
   socket.on("test", function () {
     console.log("test received");
   });

@@ -51,7 +51,8 @@ Game.getCoordinates = function (layer, pointer) {
   Client.sendClick(pointer.worldX, pointer.worldY);
 };
 
-Game.addNewPlayer = function (id, x, y, t, r, n) {
+Game.addNewPlayer = async function (id, x, y, t, r, n) {
+  let room = await Game.returnRoom(x, y);
   switch (
     r //loads sprite according to role
   ) {
@@ -81,7 +82,10 @@ Game.addNewPlayer = function (id, x, y, t, r, n) {
     Game.playerMap[id].tint = 0xffffff;
   } //save tint setting
 
-  Game.z[id] = Game.returnRoom(x, y); //updates current video zone
+  Game.z[id] = room; //updates current video zone
+  console.log("default room: ", room);
+  if (id == Client.getCurrentUser() && room == 4)
+    Client.socket.emit("join-room", room, id);
   Game.name[id] = n;
   Game.nameText[id] = game.add.text(x, y + 16, n, {
     //display player name
@@ -89,14 +93,14 @@ Game.addNewPlayer = function (id, x, y, t, r, n) {
     fill: "#000",
   });
 
-  if (Client.getCurrentUser() != id && Game.returnRoom(x, y) == 10) {
+  if (Client.getCurrentUser() != id && room == 10) {
     Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when someone enter the stage then send them our id
     Game.isOnStage[id] = true;
     // console.log("tutor on stage");
   }
 };
 
-Game.movePlayer = function (id, x, y) {
+Game.movePlayer = async function (id, x, y) {
   x -= 8;
   y -= 8;
   //moves players and changes room if x and y fall into positions
@@ -107,11 +111,8 @@ Game.movePlayer = function (id, x, y) {
   var tween = game.add.tween(player);
   var tweenn = game.add.tween(name);
   var duration = distance * 3;
-  if (
-    !Game.stageOpenedForEveryone &&
-    id != Game.tutor &&
-    Game.returnRoom(x, y) == 10
-  ) {
+  let room = await Game.returnRoom(x, y);
+  if (!Game.stageOpenedForEveryone && id != Game.tutor && room == 10) {
     //if the stage is locked by tutor then no one can access it except for the tutor
     if (x >= 160) x = 218;
     if (x < 160) x = 80;
@@ -124,8 +125,8 @@ Game.movePlayer = function (id, x, y) {
   tweenn.start();
 
   /**establish calls based on location */
-  if (Game.roomChanged(Game.z[id], Game.returnRoom(x, y))) {
-    if (Client.getCurrentUser() != id && Game.returnRoom(x, y) == 10) {
+  if (Game.roomChanged(Game.z[id], room)) {
+    if (Client.getCurrentUser() != id && room == 10) {
       //check if other player get on the stage
       Game.isOnStage[id] = true;
       console.log(`Game.isOnStage[${id}]: `, Game.isOnStage[id]);
@@ -135,11 +136,10 @@ Game.movePlayer = function (id, x, y) {
     if (Client.getCurrentUser() == id) {
       //check if currentUser change room
       Client.socket.emit("leave-room", Game.z[id], id); //leave old room
-      // console.log("Ich hab den Raum gewechselt zu: " + Game.returnRoom(x, y)); // hier client aufrufen
-      if (Game.returnRoom(x, y) > 0 && Game.returnRoom(x, y) < 6)
-        Client.socket.emit("join-room", Game.returnRoom(x, y), id); //...join new room
+      // console.log("Ich hab den Raum gewechselt zu: " +room); // hier client aufrufen
+      if (room > 0 && room < 6) Client.socket.emit("join-room", room, id); //...join new room
     }
-    Game.z[id] = Game.returnRoom(x, y);
+    Game.z[id] = room;
   }
   /**establish calls based on location */
 };
@@ -152,9 +152,10 @@ Game.removePlayer = function (id) {
   delete Game.nameText[id];
 };
 
-Game.returnRoom = function (x, y) {
-  var mode = Client.getMode();
-  switch(mode){
+Game.returnRoom = async function (x, y) {
+  var mode = await Client.getMode();
+  // console.log("mode: ", mode);
+  switch (mode) {
     case 1:
       if (x >= 112 && x < 208 && y >= 32 && y < 80) {
         console.log("Wiedergabe 10");
@@ -162,14 +163,12 @@ Game.returnRoom = function (x, y) {
       }
       if (x >= 272 && x < 304 && y >= 32 && y < 80) {
         return 11; //fragebereich
-      }
-      else {
+      } else {
         console.log("Wiedergabe 0");
         return 0;
-        
       }
     case 2:
-          //identifies room through x n' y
+      //identifies room through x n' y
       if (x >= 112 && x < 208 && y >= 32 && y < 80) {
         return 10; //bühne
       }
@@ -191,9 +190,8 @@ Game.returnRoom = function (x, y) {
     case 3:
       return 4;
     default:
-      return 1; 
+      return 1;
   }
-  
 };
 
 Game.roomChanged = function (z1, z2) {
@@ -218,7 +216,7 @@ Game.tintPlayer = function (id, t) {
   } //save tint setting
 };
 
-Game.login = async function () {
+Game.login = function () {
   let myModal = new bootstrap.Modal(document.getElementById("myModal"), {});
   myModal.show();
 };
