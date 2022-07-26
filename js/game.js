@@ -28,8 +28,6 @@ Game.create = function () {
   game.physics.startSystem(Phaser.Physics.ARCADE);
   Game.playerMap = {}; //this empty object will be useful later on to keep track of players.
   Game.name = {}; //object to retrieve Name of player in chat
-  var testKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-  testKey.onDown.add(Client.sendTest, this);
   var map = game.add.tilemap("map");
   map.addTilesetImage("tilesheet", "tileset"); // tilesheet is the key of the tileset in map's JSON file
   var layer;
@@ -39,10 +37,7 @@ Game.create = function () {
   layer.inputEnabled = true; // Allows clicking on the map ; it's enough to do it on the last layer
   Game.nameText = {}; //Displays Player Name
   Game.z = {}; //zugeordneter Raum
-  layer.events.onInputUp.add(Game.getCoordinates, this); //position of the player who clicked can be updated for everyone
-  // let person = prompt("Bitte Namen eingeben", "Name");
-  // let rolle = prompt("Bitte Rolle eingeben", "0-3");
-  // Client.askNewPlayer(person, rolle); //client will notify the server that a new player should be created
+  layer.events.onInputUp.add(Game.getCoordinates, this); //when the map is clicked, the coordinates are sent to the server, so that the position of the player who clicked can be updated for everyone
 };
 
 Game.getCoordinates = function (layer, pointer) {
@@ -84,7 +79,7 @@ Game.addNewPlayer = async function (id, x, y, t, r, n) {
 
   Game.z[id] = room; //updates current video zone
   console.log("default room: ", room);
-  if (id == Client.getCurrentUser() && room == 4)
+  if (id == Client.getCurrentUser() && room == 7)
     Client.socket.emit("join-room", room, id);
   Game.name[id] = n;
   Game.nameText[id] = game.add.text(x, y + 16, n, {
@@ -96,7 +91,6 @@ Game.addNewPlayer = async function (id, x, y, t, r, n) {
   if (Client.getCurrentUser() != id && room == 10) {
     Client.socket.emit("tutor-on-stage", id, Client.getCurrentUser()); //when someone enter the stage then send them our id
     Game.isOnStage[id] = true;
-    // console.log("tutor on stage");
   }
 };
 
@@ -136,8 +130,7 @@ Game.movePlayer = async function (id, x, y) {
     if (Client.getCurrentUser() == id) {
       //check if currentUser change room
       Client.socket.emit("leave-room", Game.z[id], id); //leave old room
-      // console.log("Ich hab den Raum gewechselt zu: " +room); // hier client aufrufen
-      if (room > 0 && room < 6) Client.socket.emit("join-room", room, id); //...join new room
+      if (room >= 1 && room <= 7) Client.socket.emit("join-room", room, id); //...join new room
     }
     Game.z[id] = room;
   }
@@ -154,43 +147,50 @@ Game.removePlayer = function (id) {
 
 Game.returnRoom = async function (x, y) {
   var mode = await Client.getMode();
-  // console.log("mode: ", mode);
   switch (mode) {
-    case 1:
+    case 1: //nur Tutor sichtbar
       if (x >= 112 && x < 208 && y >= 32 && y < 80) {
         console.log("Wiedergabe 10");
         return 10; //bühne
-      }
-      if (x >= 272 && x < 304 && y >= 32 && y < 80) {
-        return 11; //fragebereich
       } else {
         console.log("Wiedergabe 0");
         return 0;
       }
-    case 2:
+    case 2: //Tischgruppen
       //identifies room through x n' y
       if (x >= 112 && x < 208 && y >= 32 && y < 80) {
         return 10; //bühne
       }
-      if (x >= 272 && x < 304 && y >= 32 && y < 80) {
-        return 11; //fragebereich
-      }
       if (x > 208 && x <= 320 && y >= 96 && y <= 144) {
         console.log("Raum 1 betreten");
         return 1;
-      } else if (x > 208 && x <= 320 && y > 144 && y <= 192) {
+      }
+      if (x > 208 && x <= 320 && y > 144 && y <= 192) {
         console.log("Raum 2 betreten");
         return 2;
-      } else if (x > 208 && x <= 320 && y > 192 && y <= 240) {
+      }
+      if (x > 208 && x <= 320 && y > 192 && y <= 240) {
         console.log("Raum 3 betreten");
         return 3;
-      } else {
-        return 0;
       }
-    case 3:
-      return 4;
+      if (x > 16 && x <= 112 && y >= 96 && y <= 144) {
+        console.log("Raum 4 betreten");
+        return 4;
+      }
+      if (x > 16 && x <= 112 && y > 144 && y <= 192) {
+        console.log("Raum 5 betreten");
+        return 5;
+      }
+      if (x > 16 && x <= 112 && y > 192 && y <= 240) {
+        console.log("Raum 6 betreten");
+        return 6;
+      }
+      return 0;
+
+    case 3: //Alle sehen alle
+      return 7;
     default:
-      return 1;
+      return 7;
   }
 };
 
@@ -231,7 +231,7 @@ Game.loginRole = function () {
     //tutor loggt sich ein
     role = 3;
     console.log(name + "modalworks: " + role);
-    Client.askNewPlayer(name, role);
+    Client.askNewPlayer(name, role); //client will notify the server that a new player should be created
     Client.addTutorButtons();
   } else if (pw == "Tutand") {
     let modal2 = new bootstrap.Modal(document.getElementById("modal2"), {});
