@@ -18,7 +18,7 @@ npm install
 ## Testen
 ```
 node server.js
-peerjs --port 3002
+(oder npm run devStart)
 ```
 Im Browser dann `localhost:8081` eingeben
 
