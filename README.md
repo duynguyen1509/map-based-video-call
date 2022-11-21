@@ -1,5 +1,3 @@
-# Map Based Video Call
-
 My seminar project at the university
 
 # PS-SoSe22
