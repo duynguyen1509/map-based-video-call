@@ -1,3 +1,7 @@
+# Map Based Video Call
+
+My seminar project at the university
+
 # PS-SoSe22
 
 Entwicklung einer umgebungsbewussten, kartenbasierten, mobilen Videocall-
