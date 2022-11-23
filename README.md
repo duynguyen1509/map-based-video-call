@@ -1,88 +1,37 @@
-# PS-SoSe22
+# Project Seminar - Summer Semester 2022
 
-Entwicklung einer umgebungsbewussten, kartenbasierten, mobilen Videocall-
-Anwendung zur Unterstützung des digitalen Lehrbetriebs
+Development of an environment-aware, map-based, mobile video call application to support digital teaching
 
-# Anleitung zur Installation
+# Deployed version of the app
+- Heroku app: http://map-to-school.herokuapp.com
+- *Note*: To test the most simple use case, open two tabs, one for Tutor role and one for the Student role. The password for tutor role is **Tutor**, for student role is **Tutand**. There can be only one Tutor in a session 
 
-## Projekt klonen
+# Key Features
+There are 3 modes:
+- Alle sehen alle (standard): everyone can see each other, just like a normal Zoom session
+- Nur Tutor sichtbar: Only the tutor is visible to everyone, students can only see themselves' and tutor's camera. This is useful for the lecture
+- Tischgruppen: Only the people "sitting" at the same table can see each other. This is useful for small discussions
+
+# Installation guide
+
+## Clone project
 
 ```
-git clone https://gitlab.gwdg.de/ps-mob-sose22/gruppe-3-videocall-anwendung-zur-unterstuetzung-des-digitalen-lehrbetriebs/ps-sose22.git
+git clone https://github.com/duynguyen1509/map-based-video-call.git
 ```
 
-## Dependencies installieren
+## Install dependencies
 
 ```
 npm install peerjs (auf Mac: sudo npm install peerjs)
 npm install
 ```
 
-## Testen
+## Test on local host
 
 ```
 node server.js
 (oder npm run devStart)
 ```
 
-Im Browser dann `localhost:8081` eingeben
-
-# Aufbau
-
-## Room.ejs
-
-Enthält:
-
-- Header – Quellen für Bibliotheken - in Head.ejs
-- CSS-Informationen - unter Style ab Zeile 6
-- Bootstrap
-  - Navbar 154-163
-  - Responsive Container ab 189
-    - Game 193
-    - Videobereich - 205
-  - Modals 238 - 399
-    - Login
-    - Rollen
-    - Moduswahl
-  - Bootstrap Icons
-
-## Game.js
-
-- Basiert auf dem Phaser Framework
-- Bestandteile wurden aus einem Open Source Tutorial übernommen für die Verwendung von Socket.io mit Phaser
-  Phaser 2 CE
-- wichtigste Methoden:
-  - Game.preload(): Lädt alle Assets vor Zeile 9
-  - Game.create(): Erstellt die Spielumgebung und wird bei Aufruf der Datei geladen Zeile 26
-  - Game.getCoordinates(): Holt Koordinaten beim Klick Zeile 44
-  - Game.addNewPlayer(): Funktion die alle Spieler auf die Map lädt Zeile 49
-  - Game.movePlayer(): Spielerbewegung und Umgebungsbewusstsein über x und y Koordinaten Zeile 97
-
-## Server.js
-
-- Rouing und Setup von Express 1 - 35
-- 36 - 39: Globale Variablen für Chat, Modus, Bühne und Screensharing
-- 40 - 154: Reaktionen des Servers auf:
-  - Spielerbeitritt und Bewegung 40 - 64
-  - Kicken von Spielern 88
-  - Chat 107,
-  - Melden 97
-  - Modi 112-125
-  - Screenshare und Räume in Web-RTC 127 - 154, 79-86
-- 156 getter Methode für Lsite von Spielern
-
-## Client.js
-
-- Zeile 1-19: Deklaration wichtigster Variablen:
-  - Client{}: Objekt zur Verwaltung aller Attributen und Methoden in Client
-  - myPeer: PeerObjekt -> Videoanruf
-  - callsForm, callsTo[]: JS-Objekt zur Verwaltung von Calls
-- Zeile 25-144: Handeln vom Stream
-- Zeile 163-145: Pop-up Chat
-- Zeile 187-192: Handeln der Spieler-Bewegung
-- Zeile 194-306: Client.askPlayer(): Handlung nach dem erfolgreichen Log-In
-- Zeile 316-332: connectToNewUser(): Methode, andere User/Spieler/Peer anzurufen
-- Zeile 334-345: ANrufe beenden
-- Zeile 347-397: Tutor-Privillegen
-- Zeile 399-420: Share-Screen
-- Zeile 422-443: Modus des Raumes ändern und abfragen
+Then enter `localhost:8081` in the browser
