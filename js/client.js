@@ -348,14 +348,14 @@ Client.addTutorButtons = function () {
   var openOrLockStage = document.createElement("button");
   openOrLockStage.classList.add("btn", "btn-primary");
   openOrLockStage.innerHTML = Game.stageOpenedForEveryone
-    ? "Bühne sperren"
-    : "Bühne freigeben";
+    ? "Lock Stage"
+    : "Open Stage";
   button_group2.appendChild(openOrLockStage);
   openOrLockStage.onclick = function () {
     Game.stageOpenedForEveryone = !Game.stageOpenedForEveryone;
     openOrLockStage.innerHTML = Game.stageOpenedForEveryone
-      ? "Bühne sperren"
-      : "Bühne freigeben";
+      ? "Lock Stage"
+      : "Open Stage";
     Client.socket.emit("set-stage-status", Game.stageOpenedForEveryone);
     console.log("Game.stageOpenedForEveryone: ", Game.stageOpenedForEveryone);
     removePlayersFromStage();
@@ -363,16 +363,16 @@ Client.addTutorButtons = function () {
 
   var kick = document.createElement("button");
   kick.classList.add("btn", "btn-primary");
-  kick.innerHTML = "Kicken";
+  kick.innerHTML = "Kick User";
   button_group2.appendChild(kick);
   kick.onclick = function () {
-    let kicked = prompt("Bitte Namen eingeben", "Name");
+    let kicked = prompt("Please enter your displayed name", "Name");
     Client.socket.emit("kick", kicked);
   };
 
   var chat = document.createElement("button");
   chat.classList.add("btn", "btn-primary");
-  chat.innerHTML = "Chat (de-)aktivieren";
+  chat.innerHTML = "Chat (de-)activate";
   button_group2.appendChild(chat);
   chat.onclick = function () {
     Client.socket.emit("chat");
@@ -380,7 +380,7 @@ Client.addTutorButtons = function () {
 
   var mode = document.createElement("button");
   mode.classList.add("btn", "btn-primary");
-  mode.innerHTML = "Modus wählen";
+  mode.innerHTML = "Choose Mode";
   button_group2.appendChild(mode);
   mode.onclick = function () {
     let modal3 = new bootstrap.Modal(document.getElementById("modal3"), {});
@@ -389,7 +389,7 @@ Client.addTutorButtons = function () {
 
   var screenShare = document.createElement("button");
   screenShare.classList.add("btn", "btn-primary");
-  screenShare.innerHTML = "Bildschirm teilen";
+  screenShare.innerHTML = "Share Screen";
   button_group2.appendChild(screenShare);
   screenShare.onclick = function () {
     shareScreen();

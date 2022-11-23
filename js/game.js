@@ -148,7 +148,7 @@ Game.removePlayer = function (id) {
 Game.returnRoom = async function (x, y) {
   var mode = await Client.getMode();
   switch (mode) {
-    case 1: //nur Tutor sichtbar
+    case 1: //Only Tutor is visible
       if (x >= 112 && x < 208 && y >= 32 && y < 80) {
         console.log("Wiedergabe 10");
         return 10; //bühne
@@ -156,7 +156,7 @@ Game.returnRoom = async function (x, y) {
         console.log("Wiedergabe 0");
         return 0;
       }
-    case 2: //Tischgruppen
+    case 2: //Table groups
       //identifies room through x n' y
       if (x >= 112 && x < 208 && y >= 32 && y < 80) {
         return 10; //bühne
