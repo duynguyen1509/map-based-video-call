@@ -4,7 +4,7 @@ Development of an environment-aware, map-based, mobile video call application to
 
 # Deployed version of the app
 
-- Deployed version to Azure App Service: https://map-to-school.azurewebsites.net/
+- Deployed version using Azure App Service: https://map-to-school.azurewebsites.net/
 - _Note_: To test the most simple use case, open two tabs, one for Tutor role and one for the Student role. The password for tutor role is **Tutor**, for student role is **Tutand**. There can be only one Tutor in a session
 
 # Key Features
